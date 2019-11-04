@@ -3,7 +3,6 @@ package de.tarent.androidws.frickel
 import io.kotlintest.IsolationMode
 import io.kotlintest.TestCase
 import io.kotlintest.matchers.numerics.shouldBeExactly
-import io.kotlintest.should
 import io.kotlintest.specs.WordSpec
 
 internal class DemoTest : WordSpec() {

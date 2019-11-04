@@ -1,0 +1,189 @@
+[
+  {
+    "name": "Asia kitchen",
+    "presentationImage": "AsiaKitchen.png",
+    "kitchenTypes": [ "chinese", "thai" ],
+    "openinghours": [
+                  "8:00 - 16:00",
+                  "8:00 - 16:00",
+                  "Closed",
+                  "10:00 - 18:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "11:00 -19:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.404954",
+      "lat": "52.520008"
+    }
+  },
+  {
+    "name": "Guilin Noodle Express",
+    "presentationImage": "GuilinNoodleExpress.png",
+    "kitchenTypes": [ "chinese" ],
+    "openinghours": [
+                  "Closed",
+                  "10:00 - 18:00",
+                  "10:00 - 18:00",
+                  "8:00 - 16:00",
+                  "10:00 - 12:00",
+                  "11:00 - 19:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.504954",
+      "lat": "52.530008"
+    }
+  },
+  {
+    "name": "Bella Italia",
+    "presentationImage": "BellaItalia.png",
+    "kitchenTypes": [ "italian" ],
+    "openinghours": [
+                  "10:00 - 18:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "10:00 - 18:00",
+                  "8:00 - 16:00",
+                  "10:00 - 12:00",
+                  "11:00 - 19:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.414954",
+      "lat": "52.531008"
+    }
+  },
+  {
+    "name": "La Dolce Vita",
+    "presentationImage": "LaDolceVita.png",
+    "kitchenTypes": [ "italian" ],
+    "openinghours": [
+                  "Closed",
+                  "10:00 - 12:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "10:00 - 12:00",
+                  "8:00 - 16:00",
+                  "11:00 - 19:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.394954",
+      "lat": "52.511008"
+    }
+  },
+  {
+    "name": "Chiang Mai",
+    "presentationImage": "ChiangMai.png",
+    "kitchenTypes": [ "thai" ],
+    "openinghours": [
+                  "10:00 - 12:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "10:00 - 12:00",
+                  "8:00 - 16:00",
+                  "Closed",
+                  "11:00 -19:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.384954",
+      "lat": "52.501008"
+    }
+  },
+  {
+    "name": "Bangkok Hilton",
+    "presentationImage": "BangkokHilton.png",
+    "kitchenTypes": [ "thai" ],
+    "openinghours": [
+                  "11:00 - 19:00",
+                  "11:00 - 19:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "10:00 - 12:00",
+                  "8:00 - 16:00",
+                  "Closed",
+                  "Closed"],
+    "location": {
+      "lon": "13.364954",
+      "lat": "52.531008"
+    }
+  },
+  {
+    "name": "Burger World",
+    "presentationImage": "BurgerWorld.png",
+    "kitchenTypes": [ "american" ],
+    "openinghours": [
+                  "Closed",
+                  "11:00 - 19:00",
+                  "11:00 - 19:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "10:00 - 12:00",
+                  "8:00 - 16:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.354954",
+      "lat": "52.511008"
+    }
+  },
+  {
+    "name": "Burger Home",
+    "presentationImage": "BurgerHome.png",
+    "kitchenTypes": [ "american" ],
+    "openinghours": [
+                  "10:00 - 12:00",
+                  "10:00 - 12:00",
+                  "8:00 - 16:00",
+                  "11:00 - 19:00",
+                  "Closed",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.354954",
+      "lat": "52.511008"
+    }
+  },
+  {
+    "name": "Welcome to US",
+    "presentationImage": "WelcometoUS.png",
+    "kitchenTypes": [ "american" ],
+    "openinghours": [
+                  "10:00 - 12:00",
+                  "10:00 - 12:00",
+                  "Closed",
+                  "8:00 - 16:00",
+                  "11:00 - 19:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.334954",
+      "lat": "52.491008"
+    }
+  },
+  {
+    "name": "Burger Town",
+    "presentationImage": "BurgerTown.png",
+    "kitchenTypes": [ "american" ],
+    "openinghours": [
+                  "10:00 - 12:00",
+                  "10:00 - 12:00",
+                  "Closed",
+                  "8:00 - 16:00",
+                  "Closed",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.374954",
+      "lat": "52.551008"
+    }
+  },
+  {
+    "name": "Wie bei Mutter",
+    "presentationImage": "WiebeiMutter.png",
+    "kitchenTypes": [ "german" ],
+    "openinghours": [
+                  "10:00 - 12:00",
+                  "10:00 - 12:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "8:00 - 16:00",
+                  "8:00 - 16:00",
+                  "10:00 - 12:00 and 13:00 - 15:00",
+                  "Closed"],
+    "location": {
+      "lon": "13.314954",
+      "lat": "52.511008"
+    }
+  }
+]
