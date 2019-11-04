@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_url" translatable="false">https://restaurants-service-trial-day.herokuapp.com/</string>
+</resources>
