@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleDataAvailable(restaurants: List<Restaurant>) {
         progress.visibility = View.GONE
-        titleText.visibility = View.VISIBLE
         restaurantsList.visibility = View.VISIBLE
         adapter.submitList(restaurants)
     }
