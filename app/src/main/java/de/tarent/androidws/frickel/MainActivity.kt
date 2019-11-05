@@ -1,11 +1,14 @@
 package de.tarent.androidws.frickel
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,7 +18,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var restaurantsRemote: RestaurantsRemote
 
-    private val ioScope = Concurrency.ioScope()
+    private val ioContext by lazy { Concurrency.ioContext() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,14 +34,31 @@ class MainActivity : AppCompatActivity() {
         restaurantLiveData.observe(
                 this,
                 Observer<List<Restaurant>> {
-                    adapter.submitList(it)
+                    handleDataAvailable(it)
                 })
 
-        ioScope.launch {
-            with(restaurantsRemote.getRestaurants()) {
-                body()?.let(restaurantLiveData::postValue)
-            }
+        loadButton.setOnClickListener { loadButtonClicked() }
+    }
+
+    private fun loadButtonClicked() {
+        progress.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            getRestaurants(restaurantLiveData::postValue)
         }
+    }
+
+    suspend fun getRestaurants(block: (List<Restaurant>) -> Unit) = withContext(ioContext) {
+        with(restaurantsRemote.getRestaurants()) {
+            body()?.let { block(it) }
+        }
+    }
+
+    private fun handleDataAvailable(restaurants: List<Restaurant>) {
+        progress.visibility = View.GONE
+        titleText.visibility = View.VISIBLE
+        restaurantsList.visibility = View.VISIBLE
+        adapter.submitList(restaurants)
     }
 
 }
