@@ -8,13 +8,19 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
 
+typealias OnRestaurantClickListener = (Restaurant) -> Unit
+
 class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHolder>(DiffCallback()) {
+
+    var onRestaurantClickListener: OnRestaurantClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             RestaurantViewHolder.create(parent)
 
     override fun onBindViewHolder(holder: RestaurantViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), View.OnClickListener {
+            onClick(position)
+        })
     }
 
     private class DiffCallback : DiffUtil.ItemCallback<Restaurant>() {
@@ -27,13 +33,18 @@ class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHolder>(Diff
         }
     }
 
+    private fun onClick(position: Int) {
+        onRestaurantClickListener?.let { it(getItem(position)) }
+    }
+
 }
 
 class RestaurantViewHolder private constructor(private val rootView: View)
     : RecyclerView.ViewHolder(rootView) {
 
-    fun bind(restaurant: Restaurant) {
+    fun bind(restaurant: Restaurant, onClicked: View.OnClickListener) {
         with(rootView) {
+            restaurantCard.setOnClickListener(onClicked)
             restaurantName.text = restaurant.name
             restaurantImage.loadUrl(restaurant.presentationImage)
         }

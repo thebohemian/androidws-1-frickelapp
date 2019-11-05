@@ -2,6 +2,7 @@ package de.tarent.androidws.frickel
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -36,6 +37,10 @@ class MainActivity : AppCompatActivity() {
                 Observer<List<Restaurant>> {
                     handleDataAvailable(it)
                 })
+
+        adapter.onRestaurantClickListener = { restaurant ->
+            Toast.makeText(this, "Clicked: ${restaurant.name}", Toast.LENGTH_SHORT).show()
+        }
 
         loadButton.setOnClickListener { loadButtonClicked() }
     }
