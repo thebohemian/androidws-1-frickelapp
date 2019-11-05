@@ -1,5 +1,6 @@
 package de.tarent.androidws.frickel
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -43,6 +44,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadButton.setOnClickListener { loadButtonClicked() }
+
+        fab.setOnClickListener {
+            startActivity(Intent(this, FinderActivity::class.java))
+        }
     }
 
     private fun loadButtonClicked() {
