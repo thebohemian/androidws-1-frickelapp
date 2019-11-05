@@ -33,8 +33,10 @@ class RestaurantViewHolder private constructor(private val rootView: View)
     : RecyclerView.ViewHolder(rootView) {
 
     fun bind(restaurant: Restaurant) {
-        rootView.restaurantName.text = restaurant.name
-        //rootView.restaurantImage.setImageURI(restaurant.presentationImage)
+        with(rootView) {
+            restaurantName.text = restaurant.name
+            restaurantImage.loadUrl(restaurant.presentationImage)
+        }
     }
 
     companion object {

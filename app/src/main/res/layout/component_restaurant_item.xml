@@ -11,7 +11,7 @@
         android:layout_height="45dp"
         android:layout_gravity="center_vertical"
         android:importantForAccessibility="no"
-        tools:src="@tools:sample/backgrounds/scenic"/>
+        tools:src="@tools:sample/backgrounds/scenic" />
 
     <TextView
         android:id="@+id/restaurantName"
@@ -19,6 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="8dp"
+        android:textAppearance="@style/TextAppearance.Body1"
         tools:text="Knabberecke" />
 
 </LinearLayout>
