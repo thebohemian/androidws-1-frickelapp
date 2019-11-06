@@ -55,8 +55,8 @@ class MainActivity : AppCompatActivity() {
         loadData()
     }
 
-    private fun loadData() {
-        handleLoading()
+    private fun loadData(isRetry: Boolean = false) {
+        handleLoading(isRetry)
 
         lifecycleScope.launch {
             getRestaurants(restaurantLiveData::postValue)
@@ -84,14 +84,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleLoading() {
-        progress.visibility = View.VISIBLE
+    private fun handleLoading(isRetry: Boolean) {
+        if (isRetry) {
+            progress.visibility = View.VISIBLE
+
+            restaurantListSwipeRefresh.visibility = View.GONE
+        } else {
+            restaurantList.isEnabled = false
+        }
 
         errorLayout.visibility = View.GONE
         retryButton.setOnClickListener(null)
-
-        restaurantListSwipeRefresh.visibility = View.GONE
-        adapter.submitList(emptyList())
     }
 
     private fun handleDataAvailable(restaurants: List<Restaurant>) {
@@ -102,6 +105,7 @@ class MainActivity : AppCompatActivity() {
 
         restaurantListSwipeRefresh.visibility = View.VISIBLE
         restaurantListSwipeRefresh.isRefreshing = false
+        restaurantList.isEnabled = true
         adapter.submitList(restaurants)
     }
 
@@ -109,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         progress.visibility = View.GONE
 
         errorLayout.visibility = View.VISIBLE
-        retryButton.setOnClickListener { loadData() }
+        retryButton.setOnClickListener { loadData(true) }
 
         restaurantListSwipeRefresh.visibility = View.GONE
         restaurantListSwipeRefresh.isRefreshing = false
