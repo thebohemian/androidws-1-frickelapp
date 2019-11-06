@@ -44,6 +44,37 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:visibility="visible" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/errorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_sentiment_very_dissatisfied_black_48dp"
+            app:layout_constraintBottom_toTopOf="@id/errorMessageView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/errorMessageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/error_message"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/loadButton"
         style="@style/Widget.AppCompat.Button"
@@ -54,10 +85,10 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
-        android:src="@drawable/ic_camera_black_24dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="bottom|end"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_camera_black_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

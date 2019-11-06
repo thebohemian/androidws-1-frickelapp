@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOError
+import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
@@ -51,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadButtonClicked() {
-        progress.visibility = View.VISIBLE
+        handleLoading()
 
         lifecycleScope.launch {
             getRestaurants(restaurantLiveData::postValue)
@@ -59,15 +61,42 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun getRestaurants(block: (List<Restaurant>) -> Unit) = withContext(ioContext) {
-        with(restaurantsRemote.getRestaurants()) {
-            body()?.let { block(it) }
+        // Safely handle the error on UI thread
+        fun errorOut() {
+            runOnUiThread {
+                handleError()
+            }
         }
+
+        try {
+            with(restaurantsRemote.getRestaurants()) {
+                when {
+                    isSuccessful -> body()?.let { block(it) } ?: errorOut()
+                    else -> errorOut()
+                }
+
+            }
+        } catch (ioe: IOException) {
+            errorOut()
+        }
+    }
+
+    private fun handleLoading() {
+        progress.visibility = View.VISIBLE
+        errorLayout.visibility = View.GONE
+        restaurantsList.visibility = View.GONE
     }
 
     private fun handleDataAvailable(restaurants: List<Restaurant>) {
         progress.visibility = View.GONE
         restaurantsList.visibility = View.VISIBLE
         adapter.submitList(restaurants)
+    }
+
+    private fun handleError() {
+        progress.visibility = View.GONE
+        restaurantsList.visibility = View.GONE
+        errorLayout.visibility = View.VISIBLE
     }
 
 }
