@@ -3,6 +3,7 @@ package de.tarent.androidws.frickel
 import android.Manifest
 import android.graphics.Matrix
 import android.os.Bundle
+import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.ViewGroup
@@ -66,7 +67,7 @@ class FinderActivity : AppCompatActivity() {
     private fun startCamera() {
         // Image Preview
         val previewConfig = PreviewConfig.Builder().apply {
-            setTargetResolution(Size(640, 480))
+            setTargetResolution(Size(viewFinder.width, viewFinder.height))
         }.build()
 
         val previewUseCase = Preview(previewConfig).apply {
@@ -86,6 +87,7 @@ class FinderActivity : AppCompatActivity() {
 
         // Image Analysis
         val analyzerConfig = ImageAnalysisConfig.Builder().apply {
+            setTargetResolution(Size(480, 360))
             setImageReaderMode(
                     ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
         }.build()
@@ -123,7 +125,9 @@ class FinderActivity : AppCompatActivity() {
 
     private fun onDetectionSuccess(texts: List<String>) {
         texts.forEach {
-            Toast.makeText(this@FinderActivity, "barcode says: $it", Toast.LENGTH_SHORT).show()
+            val msg = "barcode says: $it"
+            Log.d(TAG, msg)
+            Toast.makeText(this@FinderActivity, msg, Toast.LENGTH_SHORT).show()
         }
     }
 
