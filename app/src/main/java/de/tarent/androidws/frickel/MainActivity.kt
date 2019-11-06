@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOError
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
@@ -33,7 +32,7 @@ class MainActivity : AppCompatActivity() {
                 baseUrl = getString(R.string.service_url),
                 kClass = RestaurantsRemote::class.java)
 
-        restaurantsList.adapter = adapter
+        restaurantList.adapter = adapter
 
         restaurantLiveData.observe(
                 this,
@@ -45,14 +44,18 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Clicked: ${restaurant.name}", Toast.LENGTH_SHORT).show()
         }
 
-        loadButton.setOnClickListener { loadButtonClicked() }
+        restaurantListSwipeRefresh.setOnRefreshListener {
+            loadData()
+        }
 
         fab.setOnClickListener {
             startActivity(Intent(this, FinderActivity::class.java))
         }
+
+        loadData()
     }
 
-    private fun loadButtonClicked() {
+    private fun loadData() {
         handleLoading()
 
         lifecycleScope.launch {
@@ -83,20 +86,34 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleLoading() {
         progress.visibility = View.VISIBLE
+
         errorLayout.visibility = View.GONE
-        restaurantsList.visibility = View.GONE
+        retryButton.setOnClickListener(null)
+
+        restaurantListSwipeRefresh.visibility = View.GONE
+        adapter.submitList(emptyList())
     }
 
     private fun handleDataAvailable(restaurants: List<Restaurant>) {
         progress.visibility = View.GONE
-        restaurantsList.visibility = View.VISIBLE
+
+        errorLayout.visibility = View.GONE
+        retryButton.setOnClickListener(null)
+
+        restaurantListSwipeRefresh.visibility = View.VISIBLE
+        restaurantListSwipeRefresh.isRefreshing = false
         adapter.submitList(restaurants)
     }
 
     private fun handleError() {
         progress.visibility = View.GONE
-        restaurantsList.visibility = View.GONE
+
         errorLayout.visibility = View.VISIBLE
+        retryButton.setOnClickListener { loadData() }
+
+        restaurantListSwipeRefresh.visibility = View.GONE
+        restaurantListSwipeRefresh.isRefreshing = false
+        adapter.submitList(emptyList())
     }
 
 }
