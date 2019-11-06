@@ -3,4 +3,6 @@
     <string name="restaurants">Restaurants</string>
     <string name="retry">Try again</string>
     <string name="error_message">Sorry. Internet is b0rken today!</string>
+    <string name="portrait">portrait</string>
+    <string name="landscape">landscape</string>
 </resources>
