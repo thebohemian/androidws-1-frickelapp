@@ -1,6 +1,7 @@
 package de.tarent.androidws.frickel
 
 import android.Manifest
+import android.content.Intent
 import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
@@ -152,14 +153,12 @@ class FinderActivity : AppCompatActivity() {
     private fun onDetected(rawValues: List<String>) {
         rawValues.elementAtOrNull(0)?.let {
 
-            val msg = "barcode says: $it"
-            Log.d(TAG, msg)
-
-            Toast.makeText(this@FinderActivity, msg, Toast.LENGTH_SHORT)
-                    .show()
-
-            // TODO: Return value somehow
-            finish()
+            // Old school
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                action = MainActivity.INTENT_ACTION_SCANNED_NAME
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra(MainActivity.INTENT_EXTRA_NAME_KEY, it)
+            })
         }
 
         cameraTextureView.postDelayed({
@@ -168,6 +167,7 @@ class FinderActivity : AppCompatActivity() {
     }
 
     companion object {
+
         private val TAG = "FinderAct"
 
         private const val NOT_YET_SET = -1

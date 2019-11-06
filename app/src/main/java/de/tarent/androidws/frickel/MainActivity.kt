@@ -2,22 +2,28 @@ package de.tarent.androidws.frickel
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.component_restaurant_item.view.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private val restaurantLiveData = MutableLiveData<List<Restaurant>>()
 
     private val adapter = RestaurantListAdapter()
+
+    private var lookingForRestaurant: String? = null
 
     private lateinit var restaurantsRemote: RestaurantsRemote
 
@@ -53,6 +59,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadData()
+
+        intent?.let { checkIntent(it) }
     }
 
     private fun loadData(isRetry: Boolean = false) {
@@ -107,6 +115,15 @@ class MainActivity : AppCompatActivity() {
         restaurantListSwipeRefresh.isRefreshing = false
         restaurantList.isEnabled = true
         adapter.submitList(restaurants)
+
+        restaurantList.post {
+
+            lookingForRestaurant?.let {
+                lookForRestaurantName(restaurants, it)
+                lookingForRestaurant = null
+            }
+
+        }
     }
 
     private fun handleError() {
@@ -120,4 +137,43 @@ class MainActivity : AppCompatActivity() {
         adapter.submitList(emptyList())
     }
 
+    private fun checkIntent(intent: Intent) {
+        when (intent.action) {
+            INTENT_ACTION_SCANNED_NAME -> intent.getStringExtra(INTENT_EXTRA_NAME_KEY)?.let { lookingForRestaurant = it }
+            else -> {
+                Log.d(TAG, "Was not a special intent.")
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        intent?.let { checkIntent(it) }
+    }
+
+    private fun lookForRestaurantName(restos: List<Restaurant>, restaurantName: String) {
+        val index = restos.indexOfFirst {
+            it.name.toLowerCase(Locale.getDefault()) == restaurantName.toLowerCase(Locale.getDefault())
+        }
+
+        if (index != NOT_FOUND) {
+            restaurantList.layoutManager
+                    ?.findViewByPosition(index)
+                    ?.restaurantCard?.performClick()
+        } else {
+            Snackbar.make(rootLayout, "Could not find restaurant: $restaurantName", Snackbar.LENGTH_SHORT)
+                    .show()
+        }
+    }
+
+    companion object {
+        private const val TAG = "MainAct"
+
+        private const val NOT_FOUND = -1
+
+        val INTENT_ACTION_SCANNED_NAME = "scanned_name"
+
+        val INTENT_EXTRA_NAME_KEY = "name"
+    }
 }
