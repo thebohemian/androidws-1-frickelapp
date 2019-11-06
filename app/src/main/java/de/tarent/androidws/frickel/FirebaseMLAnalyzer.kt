@@ -8,8 +8,9 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOption
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
 
-class FirebaseMLAnalyzer(
-        private val onSuccess: (List<String>) -> Unit) : ImageAnalysis.Analyzer {
+class FirebaseMLAnalyzer : ImageAnalysis.Analyzer {
+
+    var onSuccess: ((List<String>) -> Unit)? = null
 
     val detector = FirebaseVision.getInstance()
             .getVisionBarcodeDetector(FirebaseVisionBarcodeDetectorOptions.Builder()
@@ -34,10 +35,7 @@ class FirebaseMLAnalyzer(
     private fun detect(image: FirebaseVisionImage) {
         detector.detectInImage(image)
                 .addOnSuccessListener { barcodes ->
-                    onSuccess(barcodes.mapNotNull { it.rawValue })
-                }
-                .addOnFailureListener {
-                    //Log.w(FinderActivity.TAG, "Failed to detect barcode!")
+                    onSuccess?.invoke(barcodes.mapNotNull { it.rawValue })
                 }
     }
 

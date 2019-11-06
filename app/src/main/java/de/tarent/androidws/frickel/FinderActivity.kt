@@ -9,7 +9,9 @@ import android.view.Surface
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import androidx.camera.core.CameraX
+import androidx.camera.core.Preview
+import androidx.camera.core.PreviewConfig
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -19,17 +21,21 @@ import com.karumi.dexter.listener.single.BasePermissionListener
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener
 import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.activity_finder.*
-import java.util.concurrent.Executors
 
 class FinderActivity : AppCompatActivity() {
 
-    private val executor = Executors.newSingleThreadExecutor()
+    private var lastAdjustedOrientation = -1
+
+    private val orientationCheckClosure = ::orientationCheck
+
+    private val qrCodeDetector = QRCodeDetector(
+            analyzer = FirebaseMLAnalyzer())
 
     private fun newPermissionListener(permissionListener: PermissionListener): PermissionListener = object : BasePermissionListener() {
         override fun onPermissionGranted(response: PermissionGrantedResponse?) {
             super.onPermissionGranted(response)
 
-            viewFinder.post { startCamera() }
+            cameraTextureView.post { startCamera() }
         }
 
         override fun onPermissionDenied(response: PermissionDeniedResponse?) {
@@ -40,6 +46,26 @@ class FinderActivity : AppCompatActivity() {
 
         override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {
             permissionListener.onPermissionRationaleShouldBeShown(permission, token)
+        }
+    }
+
+    /**
+     * Checks whether the last orientation update and the current display
+     * rotation are different and calls the transformation update if necessary.
+     *
+     * This is a workaround for devices where a 180 degree orientation change
+     * is not causing a configuration change.
+     */
+    private fun orientationCheck() {
+        with (cameraTextureView) {
+            display?.let {
+                if (lastAdjustedOrientation != NOT_YET_SET
+                        && lastAdjustedOrientation != it.rotation) {
+                    updateCameraViewTransform()
+                }
+            }
+
+            postDelayed(orientationCheckClosure, ORIENTATION_CHECK_DELAY_MS)
         }
     }
 
@@ -59,80 +85,96 @@ class FinderActivity : AppCompatActivity() {
                         .build()))
                 .check()
 
-        viewFinder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            updateViewFinderTransform()
-        }
+        cameraTextureView.postDelayed(orientationCheckClosure, ORIENTATION_CHECK_DELAY_MS)
+    }
+
+    override fun onStop() {
+        cameraTextureView.removeCallbacks(orientationCheckClosure)
+
+        super.onStop()
     }
 
     private fun startCamera() {
         // Image Preview
         val previewConfig = PreviewConfig.Builder().apply {
-            setTargetResolution(Size(viewFinder.width, viewFinder.height))
+            setTargetResolution(Size(cameraTextureView.width, cameraTextureView.height))
         }.build()
 
         val previewUseCase = Preview(previewConfig).apply {
             // Every time the viewfinder is updated, recompute layout
             setOnPreviewOutputUpdateListener { output ->
-
-                // To update the SurfaceTexture, we have to remove it and re-add it
-                (viewFinder.parent as ViewGroup).apply {
-                    removeView(viewFinder)
-                    addView(viewFinder, 0)
+                (cameraTextureView.parent as? ViewGroup)?.apply {
+                    removeView(cameraTextureView)
+                    addView(cameraTextureView, 0)
                 }
 
-                viewFinder.surfaceTexture = output.surfaceTexture
-                updateViewFinderTransform()
+                cameraTextureView.surfaceTexture = output.surfaceTexture
+
+                updateCameraViewTransform()
             }
         }
 
-        // Image Analysis
-        val analyzerConfig = ImageAnalysisConfig.Builder().apply {
-            setTargetResolution(Size(480, 360))
-            setImageReaderMode(
-                    ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
-        }.build()
+        Log.d(TAG, "start camera")
+        qrCodeDetector.onDetected = ::onDetected
+        qrCodeDetector.isDetecting = true
 
-        val analyzerUseCase = ImageAnalysis(analyzerConfig).apply {
-            setAnalyzer(executor, FirebaseMLAnalyzer(::onDetectionSuccess))
-        }
-
-        CameraX.bindToLifecycle(this, previewUseCase, analyzerUseCase)
+        CameraX.bindToLifecycle(this, previewUseCase, qrCodeDetector.analyzerUseCase)
     }
 
-    private fun updateViewFinderTransform() {
-        with(viewFinder) {
-            // Compute the center of the view finder
-            val centerX = width / 2f
-            val centerY = height / 2f
-
-            // Correct preview output to account for display rotation
-            val rotationDegrees = when (display.rotation) {
-                Surface.ROTATION_0 -> 0
-                Surface.ROTATION_90 -> 90
-                Surface.ROTATION_180 -> 180
-                Surface.ROTATION_270 -> 270
+    private fun updateCameraViewTransform() {
+        // Correct preview output to account for display rotation
+        with(cameraTextureView) {
+            when (display.rotation) {
+                Surface.ROTATION_0 -> Triple(0f, 1f, 1f)
+                Surface.ROTATION_90 -> Triple(90f, width / height.toFloat(), height / width.toFloat())
+                Surface.ROTATION_180 -> Triple(180f, 1f, 1f)
+                Surface.ROTATION_270 -> Triple(270f, width / height.toFloat(), height / width.toFloat())
                 else -> return
+            }.let { matrixParms ->
+                Log.d(TAG, "update view transform: ${matrixParms.first}")
+
+                // Compute the center of the view finder
+                val centerX = width / 2f
+                val centerY = height / 2f
+
+                // Finally, apply transformations to our TextureView
+                setTransform(Matrix().apply {
+                    postRotate(-matrixParms.first, centerX, centerY)
+
+                    postScale(matrixParms.second, matrixParms.third, centerX, centerY)
+                })
+
+                lastAdjustedOrientation = display.rotation
             }
-
-            // Finally, apply transformations to our TextureView
-            setTransform(Matrix().apply {
-                postRotate(-rotationDegrees.toFloat(), centerX, centerY)
-            })
-
         }
-
     }
 
-    private fun onDetectionSuccess(texts: List<String>) {
-        texts.forEach {
+    private fun onDetected(rawValues: List<String>) {
+        rawValues.elementAtOrNull(0)?.let {
+
             val msg = "barcode says: $it"
             Log.d(TAG, msg)
-            Toast.makeText(this@FinderActivity, msg, Toast.LENGTH_SHORT).show()
+
+            Toast.makeText(this@FinderActivity, msg, Toast.LENGTH_SHORT)
+                    .show()
+
+            // TODO: Return value somehow
+            finish()
         }
+
+        cameraTextureView.postDelayed({
+            qrCodeDetector.isDetecting = true
+        }, DETECTOR_REENABLE_DELAY_MS)
     }
 
     companion object {
         private val TAG = "FinderAct"
+
+        private const val NOT_YET_SET = -1
+
+        private const val ORIENTATION_CHECK_DELAY_MS = 1000L
+
+        private const val DETECTOR_REENABLE_DELAY_MS = 1500L
     }
 
 }
