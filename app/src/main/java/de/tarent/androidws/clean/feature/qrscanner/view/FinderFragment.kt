@@ -16,7 +16,6 @@ import androidx.camera.core.PreviewConfig
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -26,16 +25,38 @@ import com.karumi.dexter.listener.single.BasePermissionListener
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener
 import com.karumi.dexter.listener.single.PermissionListener
 import de.tarent.androidws.clean.R
-import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.qrscanner.extensions._debugReturnEarly
+import de.tarent.androidws.clean.feature.qrscanner.injection.FinderModule
+import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import kotlinx.android.synthetic.main.component_fragment_finder.*
+import org.rewedigital.katana.KatanaTrait
+import org.rewedigital.katana.android.fragment.KatanaFragmentDelegate
+import org.rewedigital.katana.android.fragment.fragmentDelegate
+import org.rewedigital.katana.androidx.viewmodel.activityViewModelNow
+import org.rewedigital.katana.androidx.viewmodel.viewModelNow
 
 class FinderFragment : Fragment() {
 
-    private val sharedViewModel: FinderSharedViewModel by navGraphViewModels(R.id.nav_graph)
+    private lateinit var sharedViewModel: FinderSharedViewModel
 
-    private val qrCodeDetector = QRCodeDetector(
-            analyzer = FirebaseMLAnalyzer())
+    private lateinit var qrCodeDetector: QRCodeDetector
+
+    private val fragmentDelegate: KatanaFragmentDelegate<FinderFragment> = fragmentDelegate { activity, _ ->
+        with((activity as KatanaTrait).component + FinderModule) {
+            qrCodeDetector = injectNow()
+            sharedViewModel = activityViewModelNow(this@FinderFragment)
+        }
+    }
+
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) = Unit
+        override fun onDisplayRemoved(displayId: Int) = Unit
+        override fun onDisplayChanged(displayId: Int) {
+            cameraTextureView?.let {
+                updateCameraViewTransform()
+            }
+        }
+    }
 
     private fun newPermissionListener(permissionListener: PermissionListener): PermissionListener = object : BasePermissionListener() {
         override fun onPermissionGranted(response: PermissionGrantedResponse?) {
@@ -52,16 +73,6 @@ class FinderFragment : Fragment() {
 
         override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {
             permissionListener.onPermissionRationaleShouldBeShown(permission, token)
-        }
-    }
-
-    private val displayListener = object : DisplayManager.DisplayListener {
-        override fun onDisplayAdded(displayId: Int) = Unit
-        override fun onDisplayRemoved(displayId: Int) = Unit
-        override fun onDisplayChanged(displayId: Int) {
-            cameraTextureView?.let {
-                updateCameraViewTransform()
-            }
         }
     }
 
@@ -87,6 +98,12 @@ class FinderFragment : Fragment() {
         }
 
         _debugReturnEarly()
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        fragmentDelegate.onActivityCreated(savedInstanceState)
     }
 
     override fun onStop() {

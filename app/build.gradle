@@ -66,6 +66,9 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.10.0'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.10.0@aar'
 
+    implementation 'org.rewedigital.katana:katana-android:1.8.3'
+    implementation 'org.rewedigital.katana:katana-androidx-viewmodel:1.8.3'
+
     testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
     testImplementation 'io.mockk:mockk:1.9.3'
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"

@@ -11,28 +11,39 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
 import com.google.android.material.snackbar.Snackbar
 import de.tarent.androidws.clean.R
-import de.tarent.androidws.clean.core.ServiceCreator
-import de.tarent.androidws.clean.core.concurrency.Concurrency
 import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
+import de.tarent.androidws.clean.feature.restaurant.injection.RestaurantModule
 import de.tarent.androidws.clean.feature.restaurant.usecase.GetRestaurantUseCase
 import de.tarent.androidws.clean.repository.common.extension.onFail
+import de.tarent.androidws.clean.repository.restaurant.injection.RestaurantRepositoryModule
 import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
-import de.tarent.androidws.clean.repository.restaurant.repository.RestaurantRepository
 import kotlinx.android.synthetic.main.component_fragment_restaurantlist.*
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.rewedigital.katana.KatanaTrait
+import org.rewedigital.katana.android.fragment.KatanaFragmentDelegate
+import org.rewedigital.katana.android.fragment.fragmentDelegate
+import org.rewedigital.katana.androidx.viewmodel.activityViewModelNow
 import java.util.*
 
 @ExperimentalCoroutinesApi
 class RestaurantListFragment : Fragment() {
 
-    private val finderSharedViewModel: FinderSharedViewModel by navGraphViewModels(R.id.nav_graph)
+    private lateinit var getRestaurantUseCase: GetRestaurantUseCase
+
+    private lateinit var finderSharedViewModel: FinderSharedViewModel
+
+    private val fragmentDelegate: KatanaFragmentDelegate<RestaurantListFragment> = fragmentDelegate { activity, _ ->
+        with((activity as KatanaTrait).component + listOf(RestaurantModule, RestaurantRepositoryModule)) {
+            getRestaurantUseCase = injectNow()
+            finderSharedViewModel = activityViewModelNow(this@RestaurantListFragment)
+        }
+    }
 
     /**
      * Keeps the data and it can be listened on for data changes.
@@ -44,17 +55,11 @@ class RestaurantListFragment : Fragment() {
      */
     private val adapter = RestaurantListAdapter()
 
-    private lateinit var getRestaurantUseCase: GetRestaurantUseCase
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.component_fragment_restaurantlist, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         context?.let { nonNullContext ->
-            getRestaurantUseCase = GetRestaurantUseCase(
-                    context = Concurrency.ioContext(),
-                    restaurantRepository = RestaurantRepository.create(nonNullContext, ServiceCreator)
-            )
 
             // Makes RecyclerView use the restaurant adapter
             restaurantList.adapter = adapter
@@ -85,10 +90,17 @@ class RestaurantListFragment : Fragment() {
                 findNavController().navigate(R.id.action_restaurantListFragment_to_finderFragment)
             }
 
-            // Final step:
-            // Automatic data load upon opening of the activity.
-            loadData()
         }
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        fragmentDelegate.onActivityCreated(savedInstanceState)
+
+        // Final step:
+        // Automatic data load upon opening of the activity.
+        loadData()
     }
 
     private fun loadData(isInitialOrRetry: Boolean = true) {

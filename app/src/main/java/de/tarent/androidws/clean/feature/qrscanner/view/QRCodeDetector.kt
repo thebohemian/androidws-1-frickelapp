@@ -4,11 +4,10 @@ import android.util.Size
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageAnalysisConfig
 import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import kotlin.properties.Delegates
 
 class QRCodeDetector(
-        private val executor: Executor = Executors.newSingleThreadExecutor(),
+        private val executor: Executor,
         private val analyzer: FirebaseMLAnalyzer) {
 
     val analyzerUseCase = ImageAnalysis(ImageAnalysisConfig.Builder().apply {
