@@ -1,14 +1,15 @@
 package de.tarent.androidws.frickel
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.graphics.Matrix
+import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraX
 import androidx.camera.core.Preview
@@ -24,10 +25,6 @@ import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.activity_finder.*
 
 class FinderActivity : AppCompatActivity() {
-
-    private var lastAdjustedOrientation = -1
-
-    private val orientationCheckClosure = ::orientationCheck
 
     private val qrCodeDetector = QRCodeDetector(
             analyzer = FirebaseMLAnalyzer())
@@ -50,23 +47,13 @@ class FinderActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Checks whether the last orientation update and the current display
-     * rotation are different and calls the transformation update if necessary.
-     *
-     * This is a workaround for devices where a 180 degree orientation change
-     * is not causing a configuration change.
-     */
-    private fun orientationCheck() {
-        with (cameraTextureView) {
-            display?.let {
-                if (lastAdjustedOrientation != NOT_YET_SET
-                        && lastAdjustedOrientation != it.rotation) {
-                    updateCameraViewTransform()
-                }
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) = Unit
+        override fun onDisplayRemoved(displayId: Int) = Unit
+        override fun onDisplayChanged(displayId: Int) {
+            cameraTextureView?.let {
+                updateCameraViewTransform()
             }
-
-            postDelayed(orientationCheckClosure, ORIENTATION_CHECK_DELAY_MS)
         }
     }
 
@@ -86,11 +73,15 @@ class FinderActivity : AppCompatActivity() {
                         .build()))
                 .check()
 
-        cameraTextureView.postDelayed(orientationCheckClosure, ORIENTATION_CHECK_DELAY_MS)
+        (getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager)?.apply {
+            registerDisplayListener(displayListener, null)
+        }
     }
 
     override fun onStop() {
-        cameraTextureView.removeCallbacks(orientationCheckClosure)
+        (getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager)?.apply {
+            unregisterDisplayListener(displayListener)
+        }
 
         super.onStop()
     }
@@ -144,8 +135,6 @@ class FinderActivity : AppCompatActivity() {
 
                     postScale(matrixParms.second, matrixParms.third, centerX, centerY)
                 })
-
-                lastAdjustedOrientation = display.rotation
             }
         }
     }
@@ -169,10 +158,6 @@ class FinderActivity : AppCompatActivity() {
     companion object {
 
         private val TAG = "FinderAct"
-
-        private const val NOT_YET_SET = -1
-
-        private const val ORIENTATION_CHECK_DELAY_MS = 1000L
 
         private const val DETECTOR_REENABLE_DELAY_MS = 1500L
     }
