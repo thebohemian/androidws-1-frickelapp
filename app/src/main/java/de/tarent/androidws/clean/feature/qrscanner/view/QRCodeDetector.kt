@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean.feature.qrscanner
+package de.tarent.androidws.clean.feature.qrscanner.view
 
 import android.util.Size
 import androidx.camera.core.ImageAnalysis

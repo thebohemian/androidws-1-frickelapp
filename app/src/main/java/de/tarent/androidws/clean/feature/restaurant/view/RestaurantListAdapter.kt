@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean.feature.restaurant
+package de.tarent.androidws.clean.feature.restaurant.view
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,12 +8,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import de.tarent.androidws.clean.R
 import de.tarent.androidws.clean.core.images.extensions.loadUrl
-import de.tarent.androidws.clean.repository.restaurant.Restaurant
+import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
 
-typealias OnRestaurantClickListener = (Restaurant) -> Unit
+internal typealias OnRestaurantClickListener = (Restaurant) -> Unit
 
-class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHolder>(DiffCallback()) {
+internal class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHolder>(DiffCallback()) {
 
     var onRestaurantClickListener: OnRestaurantClickListener? = null
 

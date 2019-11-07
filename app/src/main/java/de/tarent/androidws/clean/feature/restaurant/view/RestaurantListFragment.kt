@@ -1,6 +1,7 @@
-package de.tarent.androidws.clean.feature.restaurant
+package de.tarent.androidws.clean.feature.restaurant.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,18 +14,22 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.snackbar.Snackbar
 import de.tarent.androidws.clean.R
-import de.tarent.androidws.clean.core.concurrency.Concurrency
 import de.tarent.androidws.clean.core.ServiceCreator
-import de.tarent.androidws.clean.feature.qrscanner.FinderSharedViewModel
-import de.tarent.androidws.clean.repository.restaurant.Restaurant
-import de.tarent.androidws.clean.repository.restaurant.RestaurantsRemote
+import de.tarent.androidws.clean.core.concurrency.Concurrency
+import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
+import de.tarent.androidws.clean.repository.common.extension.onFail
+import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
+import de.tarent.androidws.clean.repository.restaurant.repository.RestaurantRepository
 import kotlinx.android.synthetic.main.component_fragment_restaurantlist.*
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import java.util.*
 
+@ExperimentalCoroutinesApi
 class RestaurantListFragment : Fragment() {
 
     private val finderSharedViewModel: FinderSharedViewModel by navGraphViewModels(R.id.nav_graph)
@@ -39,18 +44,7 @@ class RestaurantListFragment : Fragment() {
      */
     private val adapter = RestaurantListAdapter()
 
-    /**
-     * Temporary storage for a restaurant that needs to be looked up.
-     *
-     * When not null, then a look up is necessary.
-     */
-    private var lookingForRestaurant: String? = null
-
-    /**
-     * Retrofit-implemented interface that does calls to the
-     * backend.
-     */
-    private lateinit var restaurantsRemote: RestaurantsRemote
+    private lateinit var restaurantRepository: RestaurantRepository
 
     /**
      * Needed for putting backend calls on a different thread.
@@ -62,11 +56,7 @@ class RestaurantListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         context?.let { nonNullContext ->
-            // Creates interface for calling backend
-            restaurantsRemote = ServiceCreator(
-                    context = nonNullContext,
-                    baseUrl = getString(R.string.service_url),
-                    kClass = RestaurantsRemote::class.java)
+            restaurantRepository = RestaurantRepository.create(nonNullContext, ServiceCreator)
 
             // Makes RecyclerView use the restaurant adapter
             restaurantList.adapter = adapter
@@ -97,15 +87,9 @@ class RestaurantListFragment : Fragment() {
                 findNavController().navigate(R.id.action_restaurantListFragment_to_finderFragment)
             }
 
-            // Automatic checking
-            finderSharedViewModel.requestPeek {
-                lookingForRestaurant = it
-            }
-
             // Final step:
             // Automatic data load upon opening of the activity.
             loadData()
-
         }
     }
 
@@ -115,29 +99,20 @@ class RestaurantListFragment : Fragment() {
 
         // Retrieves data (scope is bound to lifecycle of the activity)
         lifecycleScope.launch {
-            getRestaurants(restaurantLiveData::postValue)
+            retrieveRestaurants()
         }
     }
 
-    suspend fun getRestaurants(block: (List<Restaurant>) -> Unit) = withContext(ioContext) {
-        // Safely handle the error on UI thread
-        fun errorOut() {
-            activity?.runOnUiThread {
-                handleError()
-            }
-        }
-
-        try {
-            with(restaurantsRemote.getRestaurants()) {
-                when {
-                    isSuccessful -> body()?.let { block(it) } ?: errorOut() // -> data error
-                    else -> errorOut()      // -> HTTP or data error
+    private suspend fun retrieveRestaurants() = withContext(ioContext) {
+        restaurantRepository.getRestaurants()
+                .onFail { cause ->
+                    Log.d(TAG, "retrieving restaurants failed: ${cause.message}")
+                    activity?.runOnUiThread { handleError() }
                 }
-
-            }
-        } catch (ioe: IOException) {
-            errorOut()  // -> IO-related error (dns, network, timeout, ...)
-        }
+                .onEach {
+                    restaurantLiveData.postValue(it)
+                }
+                .collect()
     }
 
     private fun handleLoading(isInitialOrRetry: Boolean) {
@@ -179,11 +154,9 @@ class RestaurantListFragment : Fragment() {
         restaurantList.post {
             // If a restaurant name to look up was stored,
             // do the lookup now
-            lookingForRestaurant?.let {
+            finderSharedViewModel.requestPeek {
                 lookForRestaurantName(restaurants, it)
-                lookingForRestaurant = null
             }
-
         }
     }
 

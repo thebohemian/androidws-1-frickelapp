@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean.feature.qrscanner
+package de.tarent.androidws.clean.feature.qrscanner.view
 
 import android.Manifest
 import android.graphics.Matrix
@@ -26,6 +26,7 @@ import com.karumi.dexter.listener.single.BasePermissionListener
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener
 import com.karumi.dexter.listener.single.PermissionListener
 import de.tarent.androidws.clean.R
+import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.qrscanner.extensions._debugReturnEarly
 import kotlinx.android.synthetic.main.component_fragment_finder.*
 

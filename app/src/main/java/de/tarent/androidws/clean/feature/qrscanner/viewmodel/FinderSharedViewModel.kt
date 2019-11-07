@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean.feature.qrscanner
+package de.tarent.androidws.clean.feature.qrscanner.viewmodel
 
 import androidx.lifecycle.ViewModel
 
@@ -16,7 +16,10 @@ class FinderSharedViewModel : ViewModel() {
     }
 
     fun requestPeek(block: (String) -> Unit) {
-        name?.let(block::invoke)
+        name?.let {
+            name = null
+            block(it)
+        }
     }
 
 }
