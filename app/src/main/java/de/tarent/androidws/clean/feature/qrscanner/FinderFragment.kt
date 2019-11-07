@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean
+package de.tarent.androidws.clean.feature.qrscanner
 
 import android.Manifest
 import android.graphics.Matrix
@@ -25,6 +25,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.BasePermissionListener
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener
 import com.karumi.dexter.listener.single.PermissionListener
+import de.tarent.androidws.clean.R
 import kotlinx.android.synthetic.main.component_fragment_finder.*
 
 class FinderFragment : Fragment() {

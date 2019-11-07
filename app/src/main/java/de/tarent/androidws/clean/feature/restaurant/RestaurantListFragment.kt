@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean
+package de.tarent.androidws.clean.feature.restaurant
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,6 +12,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.snackbar.Snackbar
+import de.tarent.androidws.clean.R
+import de.tarent.androidws.clean.core.concurrency.Concurrency
+import de.tarent.androidws.clean.core.ServiceCreator
+import de.tarent.androidws.clean.feature.qrscanner.FinderSharedViewModel
+import de.tarent.androidws.clean.repository.restaurant.Restaurant
+import de.tarent.androidws.clean.repository.restaurant.RestaurantsRemote
 import kotlinx.android.synthetic.main.component_fragment_restaurantlist.*
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
 import kotlinx.coroutines.launch

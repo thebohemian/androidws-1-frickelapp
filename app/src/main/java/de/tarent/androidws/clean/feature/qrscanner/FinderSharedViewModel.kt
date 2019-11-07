@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean
+package de.tarent.androidws.clean.feature.qrscanner
 
 import androidx.lifecycle.ViewModel
 

@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean
+package de.tarent.androidws.clean.core.concurrency
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

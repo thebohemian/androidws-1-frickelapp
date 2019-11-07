@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean
+package de.tarent.androidws.clean.core.images
 
 import android.content.Context
 import android.graphics.drawable.Drawable

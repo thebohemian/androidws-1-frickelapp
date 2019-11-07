@@ -1,4 +1,4 @@
-package de.tarent.androidws.clean
+package de.tarent.androidws.clean.repository.restaurant
 
 data class Restaurant(
         val name: String,

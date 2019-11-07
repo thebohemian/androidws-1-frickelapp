@@ -1,8 +1,9 @@
-package de.tarent.androidws.clean
+package de.tarent.androidws.clean.core
 
 import android.content.Context
 import android.util.Log
 import com.squareup.moshi.Moshi
+import de.tarent.androidws.clean.BuildConfig
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

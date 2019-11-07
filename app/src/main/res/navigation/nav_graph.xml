@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/restaurantListFragment"
-        android:name="de.tarent.androidws.clean.RestaurantListFragment"
+        android:name="de.tarent.androidws.clean.feature.restaurant.RestaurantListFragment"
         android:label="RestaurantListFragment">
         <action
             android:id="@+id/action_restaurantListFragment_to_finderFragment"
@@ -21,6 +21,6 @@
     </action>
     <fragment
         android:id="@+id/finderFragment"
-        android:name="de.tarent.androidws.clean.FinderFragment"
+        android:name="de.tarent.androidws.clean.feature.qrscanner.FinderFragment"
         android:label="FinderFragment"/>
 </navigation>

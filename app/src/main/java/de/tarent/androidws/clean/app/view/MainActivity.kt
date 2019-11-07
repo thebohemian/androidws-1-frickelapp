@@ -1,7 +1,8 @@
-package de.tarent.androidws.clean
+package de.tarent.androidws.clean.app.view
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import de.tarent.androidws.clean.R
 
 class MainActivity : AppCompatActivity() {
 
