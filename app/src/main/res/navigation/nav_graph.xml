@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/restaurantListFragment">
+
+    <fragment
+        android:id="@+id/restaurantListFragment"
+        android:name="de.tarent.androidws.frickel.RestaurantListFragment"
+        android:label="RestaurantListFragment">
+        <action
+            android:id="@+id/action_restaurantListFragment_to_finderFragment"
+            app:destination="@id/finderFragment" />
+        <argument
+            android:name="lookupRestaurantName"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_restaurantListFragment"
+        app:destination="@id/restaurantListFragment">
+        <argument
+            android:name="lookupRestaurantName"
+            android:defaultValue="null" />
+    </action>
+    <fragment
+        android:id="@+id/finderFragment"
+        android:name="de.tarent.androidws.frickel.FinderFragment"
+        android:label="FinderFragment">
+        <action
+            android:id="@+id/action_finderFragment_to_restaurantListFragment"
+            app:destination="@id/restaurantListFragment"
+            app:launchSingleTop="true" />
+    </fragment>
+</navigation>

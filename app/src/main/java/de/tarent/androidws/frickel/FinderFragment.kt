@@ -1,19 +1,21 @@
 package de.tarent.androidws.frickel
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
 import android.graphics.Matrix
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.view.LayoutInflater
 import android.view.Surface
+import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraX
 import androidx.camera.core.Preview
 import androidx.camera.core.PreviewConfig
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -22,9 +24,9 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.BasePermissionListener
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener
 import com.karumi.dexter.listener.single.PermissionListener
-import kotlinx.android.synthetic.main.activity_finder.*
+import kotlinx.android.synthetic.main.component_fragment_finder.*
 
-class FinderActivity : AppCompatActivity() {
+class FinderFragment : Fragment() {
 
     private val qrCodeDetector = QRCodeDetector(
             analyzer = FirebaseMLAnalyzer())
@@ -39,7 +41,7 @@ class FinderActivity : AppCompatActivity() {
         override fun onPermissionDenied(response: PermissionDeniedResponse?) {
             permissionListener.onPermissionDenied(response)
 
-            finish()
+            findNavController().popBackStack()
         }
 
         override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {
@@ -57,30 +59,37 @@ class FinderActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+            inflater.inflate(R.layout.component_fragment_finder, container, false)
 
-        setContentView(R.layout.activity_finder)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        context?.let { nonNullContext ->
+            Dexter.withActivity(activity)
+                    .withPermission(Manifest.permission.CAMERA)
+                    .withListener(newPermissionListener(DialogOnDeniedPermissionListener.Builder
+                            .withContext(nonNullContext)
+                            .withTitle("Camera Permission")
+                            .withMessage("We need your camera to scan QR codes.")
+                            .withIcon(R.drawable.ic_camera_black_24dp)
+                            .withButtonText("Ok")
+                            .build()))
+                    .check()
 
-        Dexter.withActivity(this)
-                .withPermission(Manifest.permission.CAMERA)
-                .withListener(newPermissionListener(DialogOnDeniedPermissionListener.Builder
-                        .withContext(this)
-                        .withTitle("Camera Permission")
-                        .withMessage("We need your camera to scan QR codes.")
-                        .withIcon(R.drawable.ic_camera_black_24dp)
-                        .withButtonText("Ok")
-                        .build()))
-                .check()
+            ContextCompat.getSystemService(nonNullContext, DisplayManager::class.java)?.apply {
+                registerDisplayListener(displayListener, null)
+            }
+        }
 
-        (getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager)?.apply {
-            registerDisplayListener(displayListener, null)
+        view.setOnClickListener {
+            handleNameDetected("asia kitchen")
         }
     }
 
     override fun onStop() {
-        (getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager)?.apply {
-            unregisterDisplayListener(displayListener)
+        context?.let { nonNullContext ->
+            ContextCompat.getSystemService(nonNullContext, DisplayManager::class.java)?.apply {
+                unregisterDisplayListener(displayListener)
+            }
         }
 
         super.onStop()
@@ -139,18 +148,22 @@ class FinderActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleNameDetected(name: String) {
+        Log.d(TAG, "Sending $name to restaurantlist")
+        findNavController().navigate(R.id.action_finderFragment_to_restaurantListFragment,
+                RestaurantListFragmentArgs(
+                        lookupRestaurantName = name
+                ).toBundle())
+    }
+
     private fun onDetected(rawValues: List<String>) {
         rawValues.elementAtOrNull(0)?.let {
-
-            // Old school
-            startActivity(Intent(this, MainActivity::class.java).apply {
-                action = MainActivity.INTENT_ACTION_SCANNED_NAME
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra(MainActivity.INTENT_EXTRA_NAME_KEY, it)
-            })
+            handleNameDetected(it)
         }
 
-        cameraTextureView.postDelayed({
+        // We might have gone to another view, which would
+        // invalidate cameraTextureView
+        cameraTextureView?.postDelayed({
             qrCodeDetector.isDetecting = true
         }, DETECTOR_REENABLE_DELAY_MS)
     }
