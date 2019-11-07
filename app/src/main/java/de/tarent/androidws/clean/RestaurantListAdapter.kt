@@ -1,4 +1,4 @@
-package de.tarent.androidws.frickel
+package de.tarent.androidws.clean
 
 import android.view.LayoutInflater
 import android.view.View

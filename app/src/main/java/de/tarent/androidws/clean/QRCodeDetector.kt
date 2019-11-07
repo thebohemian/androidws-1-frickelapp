@@ -1,6 +1,5 @@
-package de.tarent.androidws.frickel
+package de.tarent.androidws.clean
 
-import android.util.Log
 import android.util.Size
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageAnalysisConfig

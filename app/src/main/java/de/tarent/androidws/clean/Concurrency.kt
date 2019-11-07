@@ -1,4 +1,4 @@
-package de.tarent.androidws.frickel
+package de.tarent.androidws.clean
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

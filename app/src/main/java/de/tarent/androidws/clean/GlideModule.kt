@@ -1,4 +1,4 @@
-package de.tarent.androidws.frickel
+package de.tarent.androidws.clean
 
 import android.content.Context
 import android.graphics.drawable.Drawable

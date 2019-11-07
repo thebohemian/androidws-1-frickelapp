@@ -8,6 +8,35 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:527912058078:android:a2651b6fd49fb2eaea164f",
+        "android_client_info": {
+          "package_name": "de.tarent.androidws.clean.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "527912058078-tp5nd9uok1ralicb6hi6qd8sau450duc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNTDAaqwckea0gOaEDnYNXIEXA9WuDeU0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "527912058078-tp5nd9uok1ralicb6hi6qd8sau450duc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:527912058078:android:25baecaa75d4050fea164f",
         "android_client_info": {
           "package_name": "de.tarent.androidws.frickel"

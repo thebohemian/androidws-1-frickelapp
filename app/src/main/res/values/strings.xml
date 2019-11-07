@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Frickel</string>
+    <string name="app_name">Clean</string>
     <string name="restaurants">Restaurants</string>
     <string name="restaurant_not_found">"Could not find restaurant: %s"</string>
     <string name="retry">Try again</string>

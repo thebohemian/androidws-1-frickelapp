@@ -1,8 +1,7 @@
-package de.tarent.androidws.frickel
+package de.tarent.androidws.clean
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
 
 class MainActivity : AppCompatActivity() {
 

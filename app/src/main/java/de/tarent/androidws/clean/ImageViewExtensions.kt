@@ -1,4 +1,4 @@
-package de.tarent.androidws.frickel
+package de.tarent.androidws.clean
 
 import android.widget.ImageView
 import com.bumptech.glide.load.engine.DiskCacheStrategy
