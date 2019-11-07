@@ -17,6 +17,7 @@ import de.tarent.androidws.clean.R
 import de.tarent.androidws.clean.core.ServiceCreator
 import de.tarent.androidws.clean.core.concurrency.Concurrency
 import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
+import de.tarent.androidws.clean.feature.restaurant.usecase.GetRestaurantUseCase
 import de.tarent.androidws.clean.repository.common.extension.onFail
 import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
 import de.tarent.androidws.clean.repository.restaurant.repository.RestaurantRepository
@@ -26,7 +27,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 
 @ExperimentalCoroutinesApi
@@ -44,19 +44,17 @@ class RestaurantListFragment : Fragment() {
      */
     private val adapter = RestaurantListAdapter()
 
-    private lateinit var restaurantRepository: RestaurantRepository
-
-    /**
-     * Needed for putting backend calls on a different thread.
-     */
-    private val ioContext by lazy { Concurrency.ioContext() }
+    private lateinit var getRestaurantUseCase: GetRestaurantUseCase
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.component_fragment_restaurantlist, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         context?.let { nonNullContext ->
-            restaurantRepository = RestaurantRepository.create(nonNullContext, ServiceCreator)
+            getRestaurantUseCase = GetRestaurantUseCase(
+                    context = Concurrency.ioContext(),
+                    restaurantRepository = RestaurantRepository.create(nonNullContext, ServiceCreator)
+            )
 
             // Makes RecyclerView use the restaurant adapter
             restaurantList.adapter = adapter
@@ -99,20 +97,16 @@ class RestaurantListFragment : Fragment() {
 
         // Retrieves data (scope is bound to lifecycle of the activity)
         lifecycleScope.launch {
-            retrieveRestaurants()
+            getRestaurantUseCase()
+                    .onFail { cause ->
+                        Log.d(TAG, "retrieving restaurants failed: ${cause.message}")
+                        activity?.runOnUiThread { handleError() }
+                    }
+                    .onEach {
+                        restaurantLiveData.postValue(it)
+                    }
+                    .collect()
         }
-    }
-
-    private suspend fun retrieveRestaurants() = withContext(ioContext) {
-        restaurantRepository.getRestaurants()
-                .onFail { cause ->
-                    Log.d(TAG, "retrieving restaurants failed: ${cause.message}")
-                    activity?.runOnUiThread { handleError() }
-                }
-                .onEach {
-                    restaurantLiveData.postValue(it)
-                }
-                .collect()
     }
 
     private fun handleLoading(isInitialOrRetry: Boolean) {
