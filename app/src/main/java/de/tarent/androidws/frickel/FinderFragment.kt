@@ -16,6 +16,7 @@ import androidx.camera.core.PreviewConfig
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -27,6 +28,8 @@ import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.component_fragment_finder.*
 
 class FinderFragment : Fragment() {
+
+    private val sharedViewModel: FinderSharedViewModel by navGraphViewModels(R.id.nav_graph)
 
     private val qrCodeDetector = QRCodeDetector(
             analyzer = FirebaseMLAnalyzer())
@@ -149,11 +152,9 @@ class FinderFragment : Fragment() {
     }
 
     private fun handleNameDetected(name: String) {
-        Log.d(TAG, "Sending $name to restaurantlist")
-        findNavController().navigate(R.id.action_finderFragment_to_restaurantListFragment,
-                RestaurantListFragmentArgs(
-                        lookupRestaurantName = name
-                ).toBundle())
+        Log.d(TAG, "Sending $name back")
+        sharedViewModel.put(name)
+        findNavController().popBackStack()
     }
 
     private fun onDetected(rawValues: List<String>) {

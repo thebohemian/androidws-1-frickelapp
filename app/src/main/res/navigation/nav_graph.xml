@@ -11,11 +11,6 @@
         <action
             android:id="@+id/action_restaurantListFragment_to_finderFragment"
             app:destination="@id/finderFragment" />
-        <argument
-            android:name="lookupRestaurantName"
-            android:defaultValue="@null"
-            app:argType="string"
-            app:nullable="true" />
     </fragment>
     <action
         android:id="@+id/action_global_restaurantListFragment"
@@ -27,10 +22,5 @@
     <fragment
         android:id="@+id/finderFragment"
         android:name="de.tarent.androidws.frickel.FinderFragment"
-        android:label="FinderFragment">
-        <action
-            android:id="@+id/action_finderFragment_to_restaurantListFragment"
-            app:destination="@id/restaurantListFragment"
-            app:launchSingleTop="true" />
-    </fragment>
+        android:label="FinderFragment"/>
 </navigation>

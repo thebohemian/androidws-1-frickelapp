@@ -9,9 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavArgs
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.component_fragment_restaurantlist.*
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
@@ -21,6 +20,8 @@ import java.io.IOException
 import java.util.*
 
 class RestaurantListFragment : Fragment() {
+
+    private val finderSharedViewModel: FinderSharedViewModel by navGraphViewModels(R.id.nav_graph)
 
     /**
      * Keeps the data and it can be listened on for data changes.
@@ -44,8 +45,6 @@ class RestaurantListFragment : Fragment() {
      * backend.
      */
     private lateinit var restaurantsRemote: RestaurantsRemote
-
-    private val args: RestaurantListFragmentArgs by navArgs()
 
     /**
      * Needed for putting backend calls on a different thread.
@@ -93,7 +92,9 @@ class RestaurantListFragment : Fragment() {
             }
 
             // Automatic checking
-            lookingForRestaurant = args.lookupRestaurantName
+            finderSharedViewModel.requestPeek {
+                lookingForRestaurant = it
+            }
 
             // Final step:
             // Automatic data load upon opening of the activity.

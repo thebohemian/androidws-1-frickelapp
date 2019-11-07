@@ -33,7 +33,7 @@ class QRCodeDetector(
 
     var onDetected: ((List<String>) -> Unit)? = null
 
-    var isDetecting by Delegates.observable(false) { _, oldValue, newValue ->
+    var isDetecting by Delegates.observable(false) { _, _, newValue ->
         if (analyzerUseCase.analyzer == null && newValue) {
             analyzerUseCase.setAnalyzer(executor, analyzer)
         } else {
