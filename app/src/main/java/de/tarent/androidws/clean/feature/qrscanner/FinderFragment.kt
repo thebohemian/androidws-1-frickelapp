@@ -26,6 +26,7 @@ import com.karumi.dexter.listener.single.BasePermissionListener
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener
 import com.karumi.dexter.listener.single.PermissionListener
 import de.tarent.androidws.clean.R
+import de.tarent.androidws.clean.feature.qrscanner.extensions._debugReturnEarly
 import kotlinx.android.synthetic.main.component_fragment_finder.*
 
 class FinderFragment : Fragment() {
@@ -84,9 +85,7 @@ class FinderFragment : Fragment() {
             }
         }
 
-        view.setOnClickListener {
-            handleNameDetected("asia kitchen")
-        }
+        _debugReturnEarly()
     }
 
     override fun onStop() {
@@ -152,7 +151,7 @@ class FinderFragment : Fragment() {
         }
     }
 
-    private fun handleNameDetected(name: String) {
+    internal fun handleNameDetected(name: String) {
         Log.d(TAG, "Sending $name back")
         sharedViewModel.put(name)
         findNavController().popBackStack()
