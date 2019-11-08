@@ -1,6 +1,7 @@
 package de.tarent.androidws.clean.feature.restaurant.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -78,16 +79,24 @@ class RestaurantListFragment : Fragment() {
 
         fragmentDelegate.onActivityCreated(savedInstanceState)
 
-        // Makes handleDataAvailable being called whenever new values
-        // are written into restaurantLiveData.
-        // By definition runs on the UI-thread
-        observe(viewModel.state, ::onStateUpdated)
+        viewLifecycleOwner.apply {
+            // Makes handleDataAvailable being called whenever new values
+            // are written into restaurantLiveData.
+            // By definition runs on the UI-thread
+            observe(viewModel.state, ::onStateUpdated)
+            observeEvent(viewModel.event, ::onEvent)
 
-        observeEvent(viewModel.event, ::onEvent)
+            observeEvent(finderSharedViewModel.nameEvent, ::onNameEvent)
+        }
 
         // Final step:
-        // Automatic data load upon opening of the activity.
+        // Automatic data load upon opening of the view.
         viewModel.load()
+    }
+
+    private fun onNameEvent(name: String) {
+        Log.d(TAG, "name event: ${name}")
+        viewModel.tryLookup(name)
     }
 
     private fun onStateUpdated(state: State) {
@@ -135,12 +144,6 @@ class RestaurantListFragment : Fragment() {
         restaurantListSwipeRefresh.isRefreshing = false
         restaurantList.isEnabled = true
         adapter.submitList(restaurants)
-
-        restaurantList.post {
-            finderSharedViewModel.requestPeek {
-                viewModel.tryLookup(it)
-            }
-        }
     }
 
     private fun bindViewForError() {

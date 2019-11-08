@@ -1,6 +1,9 @@
 package de.tarent.androidws.clean.feature.qrscanner.viewmodel
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import de.tarent.androidws.clean.core.viewmodel.EventHolder
 
 /**
  * Shared ViewModel which takes the return value of the [FinderFragment]
@@ -9,17 +12,12 @@ import androidx.lifecycle.ViewModel
  */
 class FinderSharedViewModel : ViewModel() {
 
-    private var name: String? = null
+    private val mutableNameEvent = MutableLiveData<EventHolder<String>>()
+
+    val nameEvent: LiveData<EventHolder<String>> = mutableNameEvent
 
     fun put(name: String) {
-        this.name = name
-    }
-
-    fun requestPeek(block: (String) -> Unit) {
-        name?.let {
-            name = null
-            block(it)
-        }
+        mutableNameEvent.value = EventHolder(name)
     }
 
 }
