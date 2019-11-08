@@ -96,7 +96,8 @@ class RestaurantListFragment : Fragment() {
             State.Initial -> Unit
             is State.Loading -> bindViewForLoading(state.isRetryOrInitial)
             is State.Content -> bindViewForContent(state.list)
-            is State.Error -> bindViewForError()
+            State.NetworkError -> bindViewForNetworkError()
+            State.GeneralError -> bindViewForGeneralError()
         }
     }
 
@@ -138,11 +139,27 @@ class RestaurantListFragment : Fragment() {
         adapter.submitList(restaurants)
     }
 
-    private fun bindViewForError() {
+    private fun bindViewForNetworkError() {
         // Sets up error view
         progress.visibility = View.GONE
 
         errorLayout.visibility = View.VISIBLE
+        errorImageView.setImageResource(R.drawable.ic_network_error_48dp)
+        errorMessageView.text = getString(R.string.networkerror_message)
+        retryButton.setOnClickListener { viewModel.load() }
+
+        restaurantListSwipeRefresh.visibility = View.GONE
+        restaurantListSwipeRefresh.isRefreshing = false
+        adapter.submitList(emptyList())
+    }
+
+    private fun bindViewForGeneralError() {
+        // Sets up error view
+        progress.visibility = View.GONE
+
+        errorLayout.visibility = View.VISIBLE
+        errorImageView.setImageResource(R.drawable.ic_general_error_48dp)
+        errorMessageView.text = getString(R.string.generalerror_message)
         retryButton.setOnClickListener { viewModel.load() }
 
         restaurantListSwipeRefresh.visibility = View.GONE

@@ -1,6 +1,7 @@
 package de.tarent.androidws.clean.repository.restaurant.repository
 
 import de.tarent.androidws.clean.repository.common.extension.flagDataError
+import de.tarent.androidws.clean.repository.common.extension.flagGeneralError
 import de.tarent.androidws.clean.repository.common.extension.flagIoError
 import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
 import de.tarent.androidws.clean.repository.restaurant.remote.RestaurantsRemote
@@ -32,4 +33,7 @@ internal class RestaurantRepositoryImpl(
         }
     }
 
+    companion object {
+        private val TAG = "RestaurantRepository"
+    }
 }

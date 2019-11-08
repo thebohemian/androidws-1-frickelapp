@@ -11,8 +11,7 @@ import de.tarent.androidws.clean.repository.common.RepositoryException
 import de.tarent.androidws.clean.repository.common.extension.onFail
 import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -28,7 +27,8 @@ abstract class RestaurantListViewModel : ViewModel() {
         object Initial : State()
         data class Loading(val isRetryOrInitial: Boolean) : State()
         data class Content(val list: List<Restaurant>) : State()
-        object Error : State()
+        object NetworkError : State()
+        object GeneralError : State()
     }
 
     abstract val state: LiveData<State>
@@ -70,11 +70,21 @@ internal class RestaurantListViewModelImpl(
             getRestaurantUseCase()
                     .onFail { onFail(it) }
                     .onEach { onData(it) }
+                    /* Creates a random grave error situation
+                    .flatMapMerge {
+                        flow<List<Restaurant>> {
+                            if (Math.random() > 0.5)
+                                throw Error("Evil!")
+                        }
+                    }
+                    */
+                    .catch { onGraveFail(it) }
                     .collect()
         }
     }
 
     private fun onData(list: List<Restaurant>) {
+        Log.d(TAG, "gotten data! first element: ${list[0]}")
         mutableState.value = State.Content(
                 list = list)
 
@@ -101,7 +111,12 @@ internal class RestaurantListViewModelImpl(
 
     private fun onFail(cause: RepositoryException) {
         Log.d(TAG, "retrieving restaurants failed: ${cause.message}")
-        mutableState.value = State.Error
+        mutableState.value = State.NetworkError
+    }
+
+    private fun onGraveFail(cause: Throwable) {
+        Log.d(TAG, "caught unexpected exception: ${cause}")
+        mutableState.value = State.GeneralError
     }
 
     override fun tryLookup(name: String) {

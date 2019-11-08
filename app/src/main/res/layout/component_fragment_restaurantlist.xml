@@ -62,10 +62,11 @@
         tools:visibility="visible">
 
         <ImageView
+            android:id="@+id/errorImageView"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:importantForAccessibility="no"
-            android:src="@drawable/ic_sentiment_very_dissatisfied_black_48dp"
+            android:src="@drawable/ic_general_error_48dp"
             app:layout_constraintBottom_toTopOf="@id/errorMessageView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -74,14 +75,13 @@
             android:id="@+id/errorMessageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:text="@string/error_message"
+            android:gravity="center"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Internet broken" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/retryButton"
