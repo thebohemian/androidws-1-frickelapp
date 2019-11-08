@@ -17,4 +17,5 @@ val RestaurantModule = Module {
     viewModel<FinderSharedViewModel> { FinderSharedViewModel() }
 
     viewModel<RestaurantListViewModel> { RestaurantListViewModelImpl(get()) }
+
 }

@@ -53,6 +53,8 @@ internal class RestaurantListViewModelImpl(
 
     override val event = mutableEvent
 
+    private var nameToLookUp: String? = null
+
     override fun load(useForce: Boolean) {
         when (state.value) {
             is State.Loading -> Unit
@@ -75,6 +77,26 @@ internal class RestaurantListViewModelImpl(
     private fun onData(list: List<Restaurant>) {
         mutableState.value = State.Content(
                 list = list)
+
+        nameToLookUp?.let {
+            nameToLookUp = null
+
+            doTryLookUp(list, it)
+        }
+    }
+
+    private fun doTryLookUp(list: List<Restaurant>, name: String) {
+        val index = list.indexOfFirst {
+            it.name.toLowerCase(Locale.getDefault()) == name.toLowerCase(Locale.getDefault())
+        }
+
+        mutableEvent.value = EventHolder(if (index != NOT_FOUND) Event.LookedUp(
+                index = index,
+                name = name
+        ) else Event.LookUpFailed(
+                name = name
+        ))
+
     }
 
     private fun onFail(cause: RepositoryException) {
@@ -84,19 +106,9 @@ internal class RestaurantListViewModelImpl(
 
     override fun tryLookup(name: String) {
         when (val stateValue = state.value) {
-            is State.Content -> {
-                val index = stateValue.list.indexOfFirst {
-                    it.name.toLowerCase(Locale.getDefault()) == name.toLowerCase(Locale.getDefault())
-                }
-
-                mutableEvent.value = EventHolder(if (index != NOT_FOUND) Event.LookedUp(
-                        index = index,
-                        name = name
-                ) else Event.LookUpFailed(
-                        name = name
-                ))
-
-            }
+            is State.Content -> doTryLookUp(stateValue.list, name)
+            is State.Loading -> nameToLookUp = name
+            State.Initial -> nameToLookUp = name
         }
     }
 

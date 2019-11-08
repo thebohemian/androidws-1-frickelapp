@@ -40,44 +40,36 @@ class RestaurantListFragment : Fragment() {
         }
     }
 
-    /**
-     *  Data handling specifically for RecyclerView (also possible for ViewPager2)
-     */
     private val adapter = RestaurantListAdapter()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.component_fragment_restaurantlist, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        context?.let { nonNullContext ->
-
-            // Makes RecyclerView use the restaurant adapter
-            restaurantList.adapter = adapter
-
-            // Wires a listener to the adapter which tells when a click
-            // on a restaurant item happened.
-            // For the moment shows a toast, might open a detail view later
-            adapter.onRestaurantClickListener = { restaurant ->
-                Toast.makeText(nonNullContext, "Clicked: ${restaurant.name}", Toast.LENGTH_SHORT).show()
-            }
-
-            // Handler for when "swipe refresh" gesture was done.
-            restaurantListSwipeRefresh.setOnRefreshListener {
-                viewModel.load(true)
-            }
-
-            // Handler for floating action button
-            fab.setOnClickListener {
-                findNavController().navigate(R.id.action_restaurantListFragment_to_finderFragment)
-            }
-
-        }
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         fragmentDelegate.onActivityCreated(savedInstanceState)
+
+        restaurantList.adapter = adapter
+
+        // Wires a listener to the adapter which tells when a click
+        // on a restaurant item happened.
+        // For the moment shows a toast, might open a detail view later
+        adapter.onRestaurantClickListener = { restaurant ->
+            context?.let { nonNullContext ->
+                Toast.makeText(nonNullContext, "Clicked: ${restaurant.name}", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Handler for when "swipe refresh" gesture was done.
+        restaurantListSwipeRefresh.setOnRefreshListener {
+            viewModel.load(true)
+        }
+
+        // Handler for floating action button
+        fab.setOnClickListener {
+            findNavController().navigate(R.id.action_restaurantListFragment_to_finderFragment)
+        }
 
         viewLifecycleOwner.apply {
             // Makes handleDataAvailable being called whenever new values
