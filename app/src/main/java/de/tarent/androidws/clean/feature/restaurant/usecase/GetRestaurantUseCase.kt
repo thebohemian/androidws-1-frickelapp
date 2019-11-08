@@ -6,8 +6,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class GetRestaurantUseCase(
         private val context: CoroutineContext,
-        private val restaurantRepository: RestaurantRepository
-) {
+        private val restaurantRepository: RestaurantRepository) {
 
     suspend operator fun invoke() = withContext(context) {
         restaurantRepository.getRestaurants()

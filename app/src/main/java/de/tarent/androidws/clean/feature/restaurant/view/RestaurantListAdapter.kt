@@ -8,30 +8,30 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import de.tarent.androidws.clean.R
 import de.tarent.androidws.clean.core.images.extensions.loadUrl
-import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
+import de.tarent.androidws.clean.feature.restaurant.model.RestaurantItem
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
 
-internal typealias OnRestaurantClickListener = (Restaurant) -> Unit
+internal typealias OnRestaurantClickListener = (RestaurantItem) -> Unit
 
-internal class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHolder>(DiffCallback()) {
+internal class RestaurantListAdapter : ListAdapter<RestaurantItem, RestaurantItemViewHolder>(DiffCallback()) {
 
     var onRestaurantClickListener: OnRestaurantClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            RestaurantViewHolder.create(parent)
+            RestaurantItemViewHolder.create(parent)
 
-    override fun onBindViewHolder(holder: RestaurantViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RestaurantItemViewHolder, position: Int) {
         holder.bind(getItem(position), View.OnClickListener {
             onClick(position)
         })
     }
 
-    private class DiffCallback : DiffUtil.ItemCallback<Restaurant>() {
-        override fun areItemsTheSame(oldItem: Restaurant, newItem: Restaurant): Boolean {
-            return oldItem.name == newItem.name
+    private class DiffCallback : DiffUtil.ItemCallback<RestaurantItem>() {
+        override fun areItemsTheSame(oldItem: RestaurantItem, newItem: RestaurantItem): Boolean {
+            return oldItem.restaurant.name == newItem.restaurant.name
         }
 
-        override fun areContentsTheSame(oldItem: Restaurant, newItem: Restaurant): Boolean {
+        override fun areContentsTheSame(oldItem: RestaurantItem, newItem: RestaurantItem): Boolean {
             return oldItem == newItem
         }
     }
@@ -42,20 +42,21 @@ internal class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHol
 
 }
 
-class RestaurantViewHolder private constructor(private val rootView: View)
+internal class RestaurantItemViewHolder private constructor(private val rootView: View)
     : RecyclerView.ViewHolder(rootView) {
 
-    fun bind(restaurant: Restaurant, onClicked: View.OnClickListener) {
+    fun bind(item: RestaurantItem, onClicked: View.OnClickListener) {
         with(rootView) {
             restaurantCard.setOnClickListener(onClicked)
-            restaurantName.text = restaurant.name
-            restaurantImage.loadUrl(restaurant.presentationImage)
+            restaurantName.text = item.restaurant.name
+            restaurantImage.loadUrl(item.restaurant.presentationImage)
+            restaurantCheckBox.isChecked = item.checked
         }
     }
 
     companion object {
         fun create(parent: ViewGroup) =
-                RestaurantViewHolder(LayoutInflater.from(parent.context)
+                RestaurantItemViewHolder(LayoutInflater.from(parent.context)
                         .inflate(R.layout.component_restaurant_item, parent, false))
     }
 

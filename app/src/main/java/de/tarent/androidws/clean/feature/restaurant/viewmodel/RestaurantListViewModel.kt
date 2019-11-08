@@ -6,27 +6,31 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tarent.androidws.clean.core.viewmodel.EventHolder
+import de.tarent.androidws.clean.feature.restaurant.mapper.RestaurantItemMapper
+import de.tarent.androidws.clean.feature.restaurant.model.RestaurantItem
 import de.tarent.androidws.clean.feature.restaurant.usecase.GetRestaurantUseCase
 import de.tarent.androidws.clean.repository.common.RepositoryException
 import de.tarent.androidws.clean.repository.common.extension.onFail
-import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.*
 
-abstract class RestaurantListViewModel : ViewModel() {
+internal abstract class RestaurantListViewModel : ViewModel() {
 
     sealed class Event {
         object None : Event()
-        data class LookedUp(val index: Int, val restaurant: Restaurant) : Event()
+        data class LookedUp(val index: Int, val item: RestaurantItem) : Event()
         data class LookUpFailed(val name: String) : Event()
     }
 
     sealed class State {
         object Initial : State()
         data class Loading(val isRetryOrInitial: Boolean) : State()
-        data class Content(val list: List<Restaurant>) : State()
+        data class Content(val list: List<RestaurantItem>) : State()
         object NetworkError : State()
         object GeneralError : State()
     }
@@ -42,7 +46,8 @@ abstract class RestaurantListViewModel : ViewModel() {
 
 @ExperimentalCoroutinesApi
 internal class RestaurantListViewModelImpl(
-        private val getRestaurantUseCase: GetRestaurantUseCase
+        private val getRestaurantUseCase: GetRestaurantUseCase,
+        private val restaurantItemMapper: RestaurantItemMapper
 ) : RestaurantListViewModel() {
 
     private val mutableState = MutableLiveData<State>(State.Initial)
@@ -68,11 +73,12 @@ internal class RestaurantListViewModelImpl(
 
         viewModelScope.launch {
             getRestaurantUseCase()
+                    .map { list -> list.map { resto -> restaurantItemMapper(resto) } }
                     .onFail { onFail(it) }
                     .onEach { onData(it) }
                     /* Creates a random grave error situation
                     .flatMapMerge {
-                        flow<List<Restaurant>> {
+                        flow<List<RestaurantItem>> {
                             if (Math.random() > 0.5)
                                 throw Error("Evil!")
                         }
@@ -83,7 +89,7 @@ internal class RestaurantListViewModelImpl(
         }
     }
 
-    private fun onData(list: List<Restaurant>) {
+    private fun onData(list: List<RestaurantItem>) {
         Log.d(TAG, "gotten data! first element: ${list[0]}")
         mutableState.value = State.Content(
                 list = list)
@@ -95,14 +101,14 @@ internal class RestaurantListViewModelImpl(
         }
     }
 
-    private fun doTryLookUp(list: List<Restaurant>, name: String) {
+    private fun doTryLookUp(list: List<RestaurantItem>, name: String) {
         val index = list.indexOfFirst {
-            it.name.toLowerCase(Locale.getDefault()) == name.toLowerCase(Locale.getDefault())
+            it.restaurant.name.toLowerCase(Locale.getDefault()) == name.toLowerCase(Locale.getDefault())
         }
 
         mutableEvent.value = EventHolder(if (index != NOT_FOUND) Event.LookedUp(
                 index = index,
-                restaurant = list[index]
+                item = list[index]
         ) else Event.LookUpFailed(
                 name = name
         ))

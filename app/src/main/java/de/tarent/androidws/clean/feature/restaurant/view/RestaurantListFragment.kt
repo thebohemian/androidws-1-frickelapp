@@ -14,13 +14,12 @@ import de.tarent.androidws.clean.core.extension.observe
 import de.tarent.androidws.clean.core.extension.observeEvent
 import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.restaurant.injection.RestaurantModule
+import de.tarent.androidws.clean.feature.restaurant.model.RestaurantItem
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.Event
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.State
 import de.tarent.androidws.clean.repository.restaurant.injection.RestaurantRepositoryModule
-import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
 import kotlinx.android.synthetic.main.component_fragment_restaurantlist.*
-import kotlinx.android.synthetic.main.component_restaurant_item.view.*
 import org.rewedigital.katana.KatanaTrait
 import org.rewedigital.katana.android.fragment.KatanaFragmentDelegate
 import org.rewedigital.katana.android.fragment.fragmentDelegate
@@ -55,7 +54,7 @@ class RestaurantListFragment : Fragment() {
         // Wires a listener to the adapter which tells when a click
         // on a restaurant item happened.
         // For the moment shows a toast, might open a detail view later
-        adapter.onRestaurantClickListener = ::onRestaurantClick
+        adapter.onRestaurantClickListener = ::onRestaurantItemClick
 
         // Handler for when "swipe refresh" gesture was done.
         restaurantListSwipeRefresh.setOnRefreshListener {
@@ -99,7 +98,7 @@ class RestaurantListFragment : Fragment() {
 
     private fun onEvent(event: Event) {
         when (event) {
-            is Event.LookedUp -> handleLookedUpEvent(event.index, event.restaurant)
+            is Event.LookedUp -> handleLookedUpEvent(event.index, event.item)
             is Event.LookUpFailed -> handleLookUpFailedEvent(event.name)
         }
     }
@@ -120,7 +119,7 @@ class RestaurantListFragment : Fragment() {
         retryButton.setOnClickListener(null)
     }
 
-    private fun bindViewForContent(restaurants: List<Restaurant>) {
+    private fun bindViewForContent(items: List<RestaurantItem>) {
         // Hides progress animation
         progress.visibility = View.GONE
 
@@ -132,7 +131,7 @@ class RestaurantListFragment : Fragment() {
         restaurantListSwipeRefresh.visibility = View.VISIBLE
         restaurantListSwipeRefresh.isRefreshing = false
         restaurantList.isEnabled = true
-        adapter.submitList(restaurants)
+        adapter.submitList(items)
     }
 
     private fun bindViewForNetworkError() {
@@ -163,13 +162,13 @@ class RestaurantListFragment : Fragment() {
         adapter.submitList(emptyList())
     }
 
-    private fun handleLookedUpEvent(index: Int, restaurant: Restaurant) {
-        onRestaurantClick(restaurant)
+    private fun handleLookedUpEvent(index: Int, item: RestaurantItem) {
+        onRestaurantItemClick(item)
     }
 
-    private fun onRestaurantClick(restaurant: Restaurant) {
+    private fun onRestaurantItemClick(item: RestaurantItem) {
         context?.let { nonNullContext ->
-            Toast.makeText(nonNullContext, "Clicked: ${restaurant.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(nonNullContext, "Clicked: ${item.restaurant.name}", Toast.LENGTH_SHORT).show()
         }
     }
 
