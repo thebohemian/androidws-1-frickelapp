@@ -19,7 +19,7 @@ abstract class RestaurantListViewModel : ViewModel() {
 
     sealed class Event {
         object None : Event()
-        data class LookedUp(val index: Int, val name: String) : Event()
+        data class LookedUp(val index: Int, val restaurant: Restaurant) : Event()
         data class LookUpFailed(val name: String) : Event()
     }
 
@@ -102,7 +102,7 @@ internal class RestaurantListViewModelImpl(
 
         mutableEvent.value = EventHolder(if (index != NOT_FOUND) Event.LookedUp(
                 index = index,
-                name = name
+                restaurant = list[index]
         ) else Event.LookUpFailed(
                 name = name
         ))

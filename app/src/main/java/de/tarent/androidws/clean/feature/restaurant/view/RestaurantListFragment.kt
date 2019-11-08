@@ -55,11 +55,7 @@ class RestaurantListFragment : Fragment() {
         // Wires a listener to the adapter which tells when a click
         // on a restaurant item happened.
         // For the moment shows a toast, might open a detail view later
-        adapter.onRestaurantClickListener = { restaurant ->
-            context?.let { nonNullContext ->
-                Toast.makeText(nonNullContext, "Clicked: ${restaurant.name}", Toast.LENGTH_SHORT).show()
-            }
-        }
+        adapter.onRestaurantClickListener = ::onRestaurantClick
 
         // Handler for when "swipe refresh" gesture was done.
         restaurantListSwipeRefresh.setOnRefreshListener {
@@ -103,7 +99,7 @@ class RestaurantListFragment : Fragment() {
 
     private fun onEvent(event: Event) {
         when (event) {
-            is Event.LookedUp -> handleLookedUpEvent(event.index, event.name)
+            is Event.LookedUp -> handleLookedUpEvent(event.index, event.restaurant)
             is Event.LookUpFailed -> handleLookUpFailedEvent(event.name)
         }
     }
@@ -167,16 +163,14 @@ class RestaurantListFragment : Fragment() {
         adapter.submitList(emptyList())
     }
 
-    private fun handleLookedUpEvent(index: Int, name: String) {
-        // Finds the view in the recyclerview that represents our Restaurant object and manipulates
-        // it
-        // Assumption: Indices in restaurant list and indices in recyclerview adapter match (not
-        // always the case)
-        // This class has knowledge of the internals of the recyclerview items
-        restaurantList.layoutManager
-                ?.findViewByPosition(index)
-                ?.restaurantCard
-                ?.performClick()
+    private fun handleLookedUpEvent(index: Int, restaurant: Restaurant) {
+        onRestaurantClick(restaurant)
+    }
+
+    private fun onRestaurantClick(restaurant: Restaurant) {
+        context?.let { nonNullContext ->
+            Toast.makeText(nonNullContext, "Clicked: ${restaurant.name}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun handleLookUpFailedEvent(name: String) {
