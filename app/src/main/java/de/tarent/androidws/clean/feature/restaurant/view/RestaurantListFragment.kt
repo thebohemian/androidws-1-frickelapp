@@ -1,54 +1,42 @@
 package de.tarent.androidws.clean.feature.restaurant.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import de.tarent.androidws.clean.R
 import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.restaurant.injection.RestaurantModule
-import de.tarent.androidws.clean.feature.restaurant.usecase.GetRestaurantUseCase
-import de.tarent.androidws.clean.repository.common.extension.onFail
+import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel
+import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.State
 import de.tarent.androidws.clean.repository.restaurant.injection.RestaurantRepositoryModule
 import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
 import kotlinx.android.synthetic.main.component_fragment_restaurantlist.*
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import org.rewedigital.katana.KatanaTrait
 import org.rewedigital.katana.android.fragment.KatanaFragmentDelegate
 import org.rewedigital.katana.android.fragment.fragmentDelegate
 import org.rewedigital.katana.androidx.viewmodel.activityViewModelNow
+import org.rewedigital.katana.androidx.viewmodel.viewModelNow
 import java.util.*
 
-@ExperimentalCoroutinesApi
 class RestaurantListFragment : Fragment() {
-
-    private lateinit var getRestaurantUseCase: GetRestaurantUseCase
 
     private lateinit var finderSharedViewModel: FinderSharedViewModel
 
+    private lateinit var viewModel: RestaurantListViewModel
+
     private val fragmentDelegate: KatanaFragmentDelegate<RestaurantListFragment> = fragmentDelegate { activity, _ ->
         with((activity as KatanaTrait).component + listOf(RestaurantModule, RestaurantRepositoryModule)) {
-            getRestaurantUseCase = injectNow()
-            finderSharedViewModel = activityViewModelNow(this@RestaurantListFragment)
+            finderSharedViewModel = activityViewModelNow(this@fragmentDelegate)
+            viewModel = viewModelNow(this@fragmentDelegate)
         }
     }
-
-    /**
-     * Keeps the data and it can be listened on for data changes.
-     */
-    private val restaurantLiveData = MutableLiveData<List<Restaurant>>()
 
     /**
      *  Data handling specifically for RecyclerView (also possible for ViewPager2)
@@ -64,15 +52,6 @@ class RestaurantListFragment : Fragment() {
             // Makes RecyclerView use the restaurant adapter
             restaurantList.adapter = adapter
 
-            // Makes handleDataAvailable being called whenever new values
-            // are written into restaurantLiveData.
-            // By definition runs on the UI-thread
-            restaurantLiveData.observe(
-                    this,
-                    Observer<List<Restaurant>> {
-                        handleDataAvailable(it)
-                    })
-
             // Wires a listener to the adapter which tells when a click
             // on a restaurant item happened.
             // For the moment shows a toast, might open a detail view later
@@ -82,7 +61,7 @@ class RestaurantListFragment : Fragment() {
 
             // Handler for when "swipe refresh" gesture was done.
             restaurantListSwipeRefresh.setOnRefreshListener {
-                loadData(false)
+                viewModel.load(true)
             }
 
             // Handler for floating action button
@@ -98,30 +77,30 @@ class RestaurantListFragment : Fragment() {
 
         fragmentDelegate.onActivityCreated(savedInstanceState)
 
+        // Makes handleDataAvailable being called whenever new values
+        // are written into restaurantLiveData.
+        // By definition runs on the UI-thread
+        viewModel.state.observe(
+                this,
+                Observer {
+                    onStateUpdated(it)
+                })
+
         // Final step:
         // Automatic data load upon opening of the activity.
-        loadData()
+        viewModel.load()
     }
 
-    private fun loadData(isInitialOrRetry: Boolean = true) {
-        // Sets UI element into loading state
-        handleLoading(isInitialOrRetry)
-
-        // Retrieves data (scope is bound to lifecycle of the activity)
-        lifecycleScope.launch {
-            getRestaurantUseCase()
-                    .onFail { cause ->
-                        Log.d(TAG, "retrieving restaurants failed: ${cause.message}")
-                        activity?.runOnUiThread { handleError() }
-                    }
-                    .onEach {
-                        restaurantLiveData.postValue(it)
-                    }
-                    .collect()
+    private fun onStateUpdated(state: State) {
+        when (state) {
+            State.Initial -> Unit
+            is State.Loading -> bindViewForLoading(state.isRetryOrInitial)
+            is State.Content -> bindViewForContent(state.list)
+            is State.Error -> bindViewForError()
         }
     }
 
-    private fun handleLoading(isInitialOrRetry: Boolean) {
+    private fun bindViewForLoading(isInitialOrRetry: Boolean) {
         if (isInitialOrRetry) {
             // Plays progress animation
             progress.visibility = View.VISIBLE
@@ -137,7 +116,7 @@ class RestaurantListFragment : Fragment() {
         retryButton.setOnClickListener(null)
     }
 
-    private fun handleDataAvailable(restaurants: List<Restaurant>) {
+    private fun bindViewForContent(restaurants: List<Restaurant>) {
         // Hides progress animation
         progress.visibility = View.GONE
 
@@ -166,12 +145,12 @@ class RestaurantListFragment : Fragment() {
         }
     }
 
-    private fun handleError() {
+    private fun bindViewForError() {
         // Sets up error view
         progress.visibility = View.GONE
 
         errorLayout.visibility = View.VISIBLE
-        retryButton.setOnClickListener { loadData() }
+        retryButton.setOnClickListener { viewModel.load() }
 
         restaurantListSwipeRefresh.visibility = View.GONE
         restaurantListSwipeRefresh.isRefreshing = false
