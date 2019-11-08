@@ -6,13 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import de.tarent.androidws.clean.R
+import de.tarent.androidws.clean.core.extension.observe
+import de.tarent.androidws.clean.core.extension.observeEvent
 import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.restaurant.injection.RestaurantModule
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel
+import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.Event
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.State
 import de.tarent.androidws.clean.repository.restaurant.injection.RestaurantRepositoryModule
 import de.tarent.androidws.clean.repository.restaurant.model.Restaurant
@@ -23,7 +25,6 @@ import org.rewedigital.katana.android.fragment.KatanaFragmentDelegate
 import org.rewedigital.katana.android.fragment.fragmentDelegate
 import org.rewedigital.katana.androidx.viewmodel.activityViewModelNow
 import org.rewedigital.katana.androidx.viewmodel.viewModelNow
-import java.util.*
 
 class RestaurantListFragment : Fragment() {
 
@@ -80,11 +81,9 @@ class RestaurantListFragment : Fragment() {
         // Makes handleDataAvailable being called whenever new values
         // are written into restaurantLiveData.
         // By definition runs on the UI-thread
-        viewModel.state.observe(
-                this,
-                Observer {
-                    onStateUpdated(it)
-                })
+        observe(viewModel.state, ::onStateUpdated)
+
+        observeEvent(viewModel.event, ::onEvent)
 
         // Final step:
         // Automatic data load upon opening of the activity.
@@ -97,6 +96,13 @@ class RestaurantListFragment : Fragment() {
             is State.Loading -> bindViewForLoading(state.isRetryOrInitial)
             is State.Content -> bindViewForContent(state.list)
             is State.Error -> bindViewForError()
+        }
+    }
+
+    private fun onEvent(event: Event) {
+        when (event) {
+            is Event.LookedUp -> handleLookedUpEvent(event.index, event.name)
+            is Event.LookUpFailed -> handleLookUpFailedEvent(event.name)
         }
     }
 
@@ -130,17 +136,9 @@ class RestaurantListFragment : Fragment() {
         restaurantList.isEnabled = true
         adapter.submitList(restaurants)
 
-        // UI is not entirely set up in this "frame". However
-        // lookupForRestaurant() might want to mess with that views.
-        // So let one render cycle pass and do the lookup in the
-        // next one, so the views are available.
-        //
-        // Remove this ".post" and see what happens.
         restaurantList.post {
-            // If a restaurant name to look up was stored,
-            // do the lookup now
             finderSharedViewModel.requestPeek {
-                lookForRestaurantName(restaurants, it)
+                viewModel.tryLookup(it)
             }
         }
     }
@@ -157,32 +155,24 @@ class RestaurantListFragment : Fragment() {
         adapter.submitList(emptyList())
     }
 
-    private fun lookForRestaurantName(restos: List<Restaurant>, restaurantName: String) {
-        // Finds index in our restaurant list (case being ignored)
-        val index = restos.indexOfFirst {
-            it.name.toLowerCase(Locale.getDefault()) == restaurantName.toLowerCase(Locale.getDefault())
-        }
+    private fun handleLookedUpEvent(index: Int, name: String) {
+        // Finds the view in the recyclerview that represents our Restaurant object and manipulates
+        // it
+        // Assumption: Indices in restaurant list and indices in recyclerview adapter match (not
+        // always the case)
+        // This class has knowledge of the internals of the recyclerview items
+        restaurantList.layoutManager
+                ?.findViewByPosition(index)
+                ?.restaurantCard
+                ?.performClick()
+    }
 
-        if (index != NOT_FOUND) {
-            // Finds the view in the recyclerview that represents our Restaurant object and manipulates
-            // it
-            // Assumption: Indices in restaurant list and indices in recyclerview adapter match (not
-            // always the case)
-            // This class has knowledge of the internals of the recyclerview items
-            restaurantList.layoutManager
-                    ?.findViewByPosition(index)
-                    ?.restaurantCard
-                    ?.performClick()
-        } else {
-            Snackbar.make(rootLayout, getString(R.string.restaurant_not_found, restaurantName), Snackbar.LENGTH_SHORT)
-                    .show()
-        }
+    private fun handleLookUpFailedEvent(name: String) {
+        Snackbar.make(rootLayout, getString(R.string.restaurant_not_found, name), Snackbar.LENGTH_SHORT)
+                .show()
     }
 
     companion object {
         private const val TAG = "RestaurantListFrag"
-
-        private const val NOT_FOUND = -1
-
     }
 }
