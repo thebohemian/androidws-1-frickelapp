@@ -55,6 +55,7 @@ class RestaurantListFragment : Fragment() {
         // on a restaurant item happened.
         // For the moment shows a toast, might open a detail view later
         adapter.onRestaurantClickListener = ::onRestaurantItemClick
+        adapter.onRestaurantCheckClickListener = ::onRestaurantItemCheckClick
 
         // Handler for when "swipe refresh" gesture was done.
         restaurantListSwipeRefresh.setOnRefreshListener {
@@ -169,6 +170,12 @@ class RestaurantListFragment : Fragment() {
     private fun onRestaurantItemClick(item: RestaurantItem) {
         context?.let { nonNullContext ->
             Toast.makeText(nonNullContext, "Clicked: ${item.restaurant.name}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun onRestaurantItemCheckClick(item: RestaurantItem) {
+        context?.let { nonNullContext ->
+            viewModel.toggleChecked(item)
         }
     }
 

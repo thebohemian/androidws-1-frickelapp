@@ -17,13 +17,19 @@ internal class RestaurantListAdapter : ListAdapter<RestaurantItem, RestaurantIte
 
     var onRestaurantClickListener: OnRestaurantClickListener? = null
 
+    var onRestaurantCheckClickListener: OnRestaurantClickListener? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             RestaurantItemViewHolder.create(parent)
 
     override fun onBindViewHolder(holder: RestaurantItemViewHolder, position: Int) {
-        holder.bind(getItem(position), View.OnClickListener {
-            onClick(position)
-        })
+        getItem(position).let { item ->
+            holder.bind(
+                    item = item,
+                    onClicked = newOnClickListener(item),
+                    onCheckClicked = newOnCheckClickListener(item)
+            )
+        }
     }
 
     private class DiffCallback : DiffUtil.ItemCallback<RestaurantItem>() {
@@ -36,8 +42,12 @@ internal class RestaurantListAdapter : ListAdapter<RestaurantItem, RestaurantIte
         }
     }
 
-    private fun onClick(position: Int) {
-        onRestaurantClickListener?.let { it(getItem(position)) }
+    private fun newOnClickListener(item: RestaurantItem) = View.OnClickListener {
+        onRestaurantClickListener?.invoke(item)
+    }
+
+    private fun newOnCheckClickListener(item: RestaurantItem) = View.OnClickListener {
+        onRestaurantCheckClickListener?.invoke(item)
     }
 
 }
@@ -45,12 +55,13 @@ internal class RestaurantListAdapter : ListAdapter<RestaurantItem, RestaurantIte
 internal class RestaurantItemViewHolder private constructor(private val rootView: View)
     : RecyclerView.ViewHolder(rootView) {
 
-    fun bind(item: RestaurantItem, onClicked: View.OnClickListener) {
+    fun bind(item: RestaurantItem, onClicked: View.OnClickListener, onCheckClicked: View.OnClickListener) {
         with(rootView) {
             restaurantCard.setOnClickListener(onClicked)
             restaurantName.text = item.restaurant.name
             restaurantImage.loadUrl(item.restaurant.presentationImage)
             restaurantCheckBox.isChecked = item.checked
+            restaurantCheckBox.setOnClickListener(onCheckClicked)
         }
     }
 

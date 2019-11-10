@@ -42,6 +42,7 @@ internal abstract class RestaurantListViewModel : ViewModel() {
     abstract fun load(useForce: Boolean = false)
 
     abstract fun tryLookup(name: String)
+    abstract fun toggleChecked(item: RestaurantItem)
 }
 
 @ExperimentalCoroutinesApi
@@ -130,6 +131,33 @@ internal class RestaurantListViewModelImpl(
             is State.Content -> doTryLookUp(stateValue.list, name)
             is State.Loading -> nameToLookUp = name
             State.Initial -> nameToLookUp = name
+        }
+    }
+
+    override fun toggleChecked(item: RestaurantItem) {
+        when (val stateValue = state.value) {
+            is State.Content -> doToggleChecked(item, stateValue)
+        }
+    }
+
+    private fun doToggleChecked(item: RestaurantItem, content: State.Content) {
+        val index = content.list.indexOf(item)
+        if (index >= NOT_FOUND) {
+            // Replaces the element in the list at "index" with
+            // an item that has it's checked flag reversed
+            val newList = content.list.mapIndexed { idx, it ->
+                if (index == idx)
+                    it.copy(
+                            checked = !item.checked
+                    )
+                else it
+            }
+
+            // Writes the state anew, causing an update of the RecyclerView's list
+            mutableState.value =
+                    content.copy(
+                            list = newList
+                    )
         }
     }
 
