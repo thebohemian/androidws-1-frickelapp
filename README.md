@@ -1,1 +1,1 @@
-# androidws-1-frickelapp
+# androidws-example-app
