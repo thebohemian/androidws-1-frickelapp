@@ -22,4 +22,13 @@
         android:textAppearance="@style/TextAppearance.Body1"
         tools:text="Knabberecke" />
 
+    <!-- TODO: Verschönere das Layout der Listenelemente:
+    - jedes Element soll eine feste Höhe von 64dp erhalten
+    - jedes Element soll eine Material Design "Card" sein (MaterialCardView)
+        - die Card soll 4dp Höhe besitzen
+    - innerhalb der Card sollen sich das Bild und der Restaurantname befinden
+    - das Bild soll quadratisch sein und allen verfügbaren vertikalen Platz beanspruchen
+    - der Text soll rechts vom Bild erscheinen (8dp Abstand) und in der Card vertikal zentriert sein
+    - ConstraintLayout ist dein Freund
+    -->
 </LinearLayout>
