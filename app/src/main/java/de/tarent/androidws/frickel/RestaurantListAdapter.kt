@@ -35,7 +35,7 @@ class RestaurantViewHolder private constructor(private val rootView: View)
     fun bind(restaurant: Restaurant) {
         with(rootView) {
             restaurantName.text = restaurant.name
-            restaurantImage.loadUrl(restaurant.presentationImage)
+            // TODO: Make restaurantImage load the URL and place the image in the view
         }
     }
 

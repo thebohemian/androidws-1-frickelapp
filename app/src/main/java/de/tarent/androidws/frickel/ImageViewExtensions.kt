@@ -1,20 +1,11 @@
 package de.tarent.androidws.frickel
 
 import android.widget.ImageView
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 
 fun ImageView.loadUrl(url: String, placeholder: Int? = null) {
-    GlideApp
-            .with(context)
-            .load(url)
-            .apply {
-                placeholder?.let {
-                    apply(RequestOptions.errorOf(it)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .placeholder(it))
-                }
-            }
-            .into(this)
-
+    // TODO: Use GlideApp to load the given URL's image data
+    // and place it into the image view (this)
+    //
+    // If possible allow showing a placeholder while the image
+    // is loading
 }
