@@ -87,8 +87,6 @@ class MainActivity : AppCompatActivity() {
     private fun handleLoading(isRetry: Boolean) {
         if (isRetry) {
             progress.visibility = View.VISIBLE
-
-            restaurantListSwipeRefresh.visibility = View.GONE
         } else {
             restaurantList.isEnabled = false
         }
