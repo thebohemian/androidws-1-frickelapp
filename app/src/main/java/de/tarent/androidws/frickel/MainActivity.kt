@@ -9,8 +9,6 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    private val restaurantLiveData = MutableLiveData<List<Restaurant>>()
-
     private val adapter = RestaurantListAdapter()
 
     private lateinit var restaurantsRemote: RestaurantsRemote
@@ -28,16 +26,14 @@ class MainActivity : AppCompatActivity() {
 
         restaurantsList.adapter = adapter
 
-        restaurantLiveData.observe(
-                this,
-                Observer<List<Restaurant>> {
-                    adapter.submitList(it)
-                })
-
         ioScope.launch {
-            with(restaurantsRemote.getRestaurants()) {
-                body()?.let(restaurantLiveData::postValue)
-            }
+            // TODO: Get the restaurant data using RestaurantsRemote
+            // and give it to the RestaurantAdapter somehow
+
+            // Beware: Retrofit runs on IO Thread but the adapter
+            // needs to be called from Main (or UI) thread.
+            
+            // LiveData can help
         }
     }
 
