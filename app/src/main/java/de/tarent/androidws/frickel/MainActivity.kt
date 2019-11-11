@@ -61,23 +61,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun getRestaurants(block: (List<Restaurant>) -> Unit) = withContext(ioContext) {
-        // Safely handle the error on UI thread
+        /* TODO: Maybe bundle all what is needed in a method, so
+        * it can be called from different places in this
+        * method body.
         fun errorOut() {
-            runOnUiThread {
-                handleError()
-            }
         }
+         */
 
         try {
             with(restaurantsRemote.getRestaurants()) {
                 when {
-                    isSuccessful -> body()?.let { block(it) } ?: errorOut()
-                    else -> errorOut()
+                    isSuccessful -> body().let { block(it) } // TODO: some handling necessary
+                    else -> Unit // TODO: should do something about it
                 }
 
             }
         } catch (ioe: IOException) {
-            errorOut()
+            // TODO: should do something about it
         }
     }
 
@@ -94,9 +94,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleError() {
-        progress.visibility = View.GONE
-        restaurantsList.visibility = View.GONE
-        errorLayout.visibility = View.VISIBLE
+        // TODO: The dedicated error views should be visible,
+        // the normal view and loading indicators should not
     }
 
 }
