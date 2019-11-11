@@ -42,10 +42,9 @@ class FinderFragment : Fragment() {
     private lateinit var qrCodeDetector: QRCodeDetector
 
     private val fragmentDelegate: KatanaFragmentDelegate<FinderFragment> = fragmentDelegate { activity, _ ->
-        with((activity as KatanaTrait).component + FinderModule) {
-            qrCodeDetector = injectNow()
-            sharedViewModel = activityViewModelNow(this@FinderFragment)
-        }
+        // TODO: Create a component which contains the activity's component and the
+        // module of the Finder. Initialize the properties which are needed in
+        // this fragment
     }
 
     private val displayListener = object : DisplayManager.DisplayListener {
