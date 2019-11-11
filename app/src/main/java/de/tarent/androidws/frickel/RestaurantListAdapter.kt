@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.component_restaurant_item.view.*
 
+/** External interface for handling clicks */
 typealias OnRestaurantClickListener = (Restaurant) -> Unit
 
 class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHolder>(DiffCallback()) {
@@ -18,9 +19,8 @@ class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHolder>(Diff
             RestaurantViewHolder.create(parent)
 
     override fun onBindViewHolder(holder: RestaurantViewHolder, position: Int) {
-        holder.bind(getItem(position), View.OnClickListener {
-            onClick(position)
-        })
+        // TODO: Also bind clicking
+        holder.bind(getItem(position))
     }
 
     private class DiffCallback : DiffUtil.ItemCallback<Restaurant>() {
@@ -33,18 +33,20 @@ class RestaurantListAdapter : ListAdapter<Restaurant, RestaurantViewHolder>(Diff
         }
     }
 
-    private fun onClick(position: Int) {
-        onRestaurantClickListener?.let { it(getItem(position)) }
-    }
+    /* TODO: Maybe have a separate function which creates the listener and the listener
+    * has all needed functionality already
+    private fun newOnClickListener(<some args>) = ...
+    */
 
 }
 
 class RestaurantViewHolder private constructor(private val rootView: View)
     : RecyclerView.ViewHolder(rootView) {
 
-    fun bind(restaurant: Restaurant, onClicked: View.OnClickListener) {
+    fun bind(restaurant: Restaurant) {
         with(rootView) {
-            restaurantCard.setOnClickListener(onClicked)
+            // TODO: get a click listener from somewhere and wire it to our card
+            //restaurantCard.setOnClickListener(...)
             restaurantName.text = restaurant.name
             restaurantImage.loadUrl(restaurant.presentationImage)
         }
