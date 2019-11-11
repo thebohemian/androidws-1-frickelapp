@@ -53,8 +53,6 @@ internal class RestaurantListViewModelImpl(
 
     override val event = mutableEvent
 
-    private var nameToLookUp: String? = null
-
     override fun load(useForce: Boolean) {
         when (state.value) {
             is State.Loading -> Unit
@@ -77,12 +75,6 @@ internal class RestaurantListViewModelImpl(
     private fun onData(list: List<Restaurant>) {
         mutableState.value = State.Content(
                 list = list)
-
-        nameToLookUp?.let {
-            nameToLookUp = null
-
-            doTryLookUp(list, it)
-        }
     }
 
     private fun doTryLookUp(list: List<Restaurant>, name: String) {
@@ -107,8 +99,12 @@ internal class RestaurantListViewModelImpl(
     override fun tryLookup(name: String) {
         when (val stateValue = state.value) {
             is State.Content -> doTryLookUp(stateValue.list, name)
-            is State.Loading -> nameToLookUp = name
-            State.Initial -> nameToLookUp = name
+            /* TODO: In the Loading and Initial state it should also
+            * be possible to do a lookup. As we dont have data yet,
+            * it needs to be done later somehow.
+            is State.Loading ->
+            State.Initial ->
+             */
         }
     }
 
