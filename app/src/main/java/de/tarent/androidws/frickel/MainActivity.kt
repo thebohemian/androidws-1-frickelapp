@@ -45,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         restaurantListSwipeRefresh.setOnRefreshListener {
+            // TODO: Here we load because of an explicit refresh
+            // request
             loadData()
         }
 
@@ -52,11 +54,15 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, FinderActivity::class.java))
         }
 
+        // TODO: Here we load initially without user interaction
         loadData()
     }
 
-    private fun loadData(isRetry: Boolean = false) {
-        handleLoading(isRetry)
+    private fun loadData() {
+        // TODO: Somehow it must be possible to distinguish between
+        // initial loading, retried loading after an error and
+        // swipe2refresh requests
+        handleLoading()
 
         lifecycleScope.launch {
             getRestaurants(restaurantLiveData::postValue)
@@ -84,14 +90,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleLoading(isRetry: Boolean) {
-        if (isRetry) {
-            progress.visibility = View.VISIBLE
+    private fun handleLoading() {
+        // TODO:
+        // The big progress should only be visible
+        // when we load initially or are retrying.
 
-            restaurantListSwipeRefresh.visibility = View.GONE
-        } else {
-            restaurantList.isEnabled = false
-        }
+        // However when we are loading again
+        // because of swipe2refresh, the recycler
+        // should better not react on anything.
 
         errorLayout.visibility = View.GONE
         retryButton.setOnClickListener(null)
@@ -113,7 +119,10 @@ class MainActivity : AppCompatActivity() {
         progress.visibility = View.GONE
 
         errorLayout.visibility = View.VISIBLE
-        retryButton.setOnClickListener { loadData(true) }
+        retryButton.setOnClickListener {
+            // TODO: Here we load because it is a retry!
+            loadData()
+        }
 
         restaurantListSwipeRefresh.visibility = View.GONE
         restaurantListSwipeRefresh.isRefreshing = false
