@@ -15,8 +15,7 @@ class FinderSharedViewModel : ViewModel() {
         this.name = name
     }
 
-    fun requestPeek(block: (String) -> Unit) {
-        name?.let(block::invoke)
-    }
+    // TODO: Add a function which under the condition that currently a value is stored
+    // delivers the result and clears the stored value
 
 }

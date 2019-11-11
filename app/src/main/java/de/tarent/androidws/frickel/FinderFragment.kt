@@ -153,8 +153,9 @@ class FinderFragment : Fragment() {
 
     private fun handleNameDetected(name: String) {
         Log.d(TAG, "Sending $name back")
-        sharedViewModel.put(name)
-        findNavController().popBackStack()
+
+        // TODO: Place found value into the viewmodel
+        // and then return control to calling fragment
     }
 
     private fun onDetected(rawValues: List<String>) {

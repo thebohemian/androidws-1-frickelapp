@@ -92,9 +92,7 @@ class RestaurantListFragment : Fragment() {
             }
 
             // Automatic checking
-            finderSharedViewModel.requestPeek {
-                lookingForRestaurant = it
-            }
+            // TODO: Look into VM whether it has a value for us
 
             // Final step:
             // Automatic data load upon opening of the activity.

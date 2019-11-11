@@ -12,10 +12,4 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.component_activity_main)
     }
 
-    companion object {
-
-        val INTENT_ACTION_SCANNED_NAME = "scanned_name"
-
-        val INTENT_EXTRA_NAME_KEY = "name"
-    }
 }
