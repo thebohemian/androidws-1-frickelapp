@@ -151,14 +151,11 @@ class FinderActivity : AppCompatActivity() {
     }
 
     private fun onDetected(rawValues: List<String>) {
-        rawValues.elementAtOrNull(0)?.let {
+        rawValues.elementAtOrNull(0)?.let { detectedName ->
 
-            // Old school
-            startActivity(Intent(this, MainActivity::class.java).apply {
-                action = MainActivity.INTENT_ACTION_SCANNED_NAME
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra(MainActivity.INTENT_EXTRA_NAME_KEY, it)
-            })
+            // TODO: Start the main activity and give it the detectedName
+            // as an argument. Also start it in a way that becomes the
+            // topmost activity in the stack.
         }
 
         cameraTextureView.postDelayed({
