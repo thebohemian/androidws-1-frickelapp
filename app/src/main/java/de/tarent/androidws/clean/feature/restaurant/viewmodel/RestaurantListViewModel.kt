@@ -12,10 +12,7 @@ import de.tarent.androidws.clean.feature.restaurant.usecase.GetRestaurantUseCase
 import de.tarent.androidws.clean.repository.common.RepositoryException
 import de.tarent.androidws.clean.repository.common.extension.onFail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -45,7 +42,7 @@ internal abstract class RestaurantListViewModel : ViewModel() {
     abstract fun toggleChecked(item: RestaurantItem)
 }
 
-@ExperimentalCoroutinesApi
+@UseExperimental(ExperimentalCoroutinesApi::class)
 internal class RestaurantListViewModelImpl(
         private val getRestaurantUseCase: GetRestaurantUseCase,
         private val restaurantItemMapper: RestaurantItemMapper
@@ -72,26 +69,24 @@ internal class RestaurantListViewModelImpl(
     private fun doLoad(isRetryOrInitial: Boolean) {
         mutableState.value = State.Loading(isRetryOrInitial)
 
-        viewModelScope.launch {
-            getRestaurantUseCase()
-                    .map { list -> list.map { resto -> restaurantItemMapper(resto) } }
-                    .onFail { onFail(it) }
-                    .onEach { onData(it) }
-                    /* Creates a random grave error situation
-                    .flatMapMerge {
-                        flow<List<RestaurantItem>> {
-                            if (Math.random() > 0.5)
-                                throw Error("Evil!")
-                        }
+        getRestaurantUseCase()
+                .map { list -> list.map { resto -> restaurantItemMapper(resto) } }
+                .onFail { onFail(it) }
+                .onEach { onData(it) }
+                /* Creates a random grave error situation
+                .flatMapMerge {
+                    flow<List<RestaurantItem>> {
+                        if (Math.random() > 0.5)
+                            throw Error("Evil!")
                     }
-                    */
-                    .catch { onGraveFail(it) }
-                    .collect()
-        }
+                }
+                */
+                .catch { onGraveFail(it) }
+                .launchIn(viewModelScope)
     }
 
     private fun onData(list: List<RestaurantItem>) {
-        Log.d(TAG, "gotten data! first element: ${list[0]}")
+        //Log.d(TAG, "gotten data! first element: ${list[0]}")
         mutableState.value = State.Content(
                 list = list)
 

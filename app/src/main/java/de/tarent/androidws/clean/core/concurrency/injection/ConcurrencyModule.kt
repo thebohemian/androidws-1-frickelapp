@@ -7,7 +7,11 @@ import kotlin.coroutines.CoroutineContext
 
 const val IO_CONTEXT = "ioContext"
 
+const val IO_DISPATCHER = "ioDispatcher"
+
 val CoreModule = Module {
+
+    singleton<CoroutineContext>(IO_DISPATCHER) { Concurrency.ioDispatcher() }
 
     singleton<CoroutineContext>(IO_CONTEXT) { Concurrency.ioContext() }
 

@@ -11,5 +11,5 @@ fun <T> Flow<T>.onFail(action: suspend FlowCollector<T>.(cause: RepositoryExcept
         catch { cause ->
             if (cause is RepositoryException) {
                 action(cause)
-            }
+            } else throw cause
         }

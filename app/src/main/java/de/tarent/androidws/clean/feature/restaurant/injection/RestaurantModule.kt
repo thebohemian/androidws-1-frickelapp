@@ -1,6 +1,6 @@
 package de.tarent.androidws.clean.feature.restaurant.injection
 
-import de.tarent.androidws.clean.core.concurrency.injection.IO_CONTEXT
+import de.tarent.androidws.clean.core.concurrency.injection.IO_DISPATCHER
 import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.restaurant.mapper.RestaurantItemMapper
 import de.tarent.androidws.clean.feature.restaurant.usecase.GetRestaurantUseCase
@@ -16,7 +16,7 @@ val RestaurantModule = Module {
 
     factory<RestaurantItemMapper> { RestaurantItemMapper() }
 
-    factory<GetRestaurantUseCase> { GetRestaurantUseCase(get(IO_CONTEXT), get()) }
+    factory<GetRestaurantUseCase> { GetRestaurantUseCase(get(IO_DISPATCHER), get()) }
 
     factory<RestaurantListViewStateBinder> { RestaurantListViewStateBinder() }
 
