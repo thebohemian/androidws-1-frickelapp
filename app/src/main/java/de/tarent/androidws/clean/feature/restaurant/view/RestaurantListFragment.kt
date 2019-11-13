@@ -15,6 +15,7 @@ import de.tarent.androidws.clean.core.extension.observeEvent
 import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.restaurant.injection.RestaurantModule
 import de.tarent.androidws.clean.feature.restaurant.model.RestaurantItem
+import de.tarent.androidws.clean.feature.restaurant.view.binder.RestaurantListViewStateBinder
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.Event
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.State
@@ -32,10 +33,13 @@ class RestaurantListFragment : Fragment() {
 
     private lateinit var viewModel: RestaurantListViewModel
 
+    private lateinit var binder: RestaurantListViewStateBinder
+
     private val fragmentDelegate: KatanaFragmentDelegate<RestaurantListFragment> = fragmentDelegate { activity, _ ->
         with((activity as KatanaTrait).component + listOf(RestaurantModule, RestaurantRepositoryModule)) {
             finderSharedViewModel = activityViewModelNow(this@fragmentDelegate)
             viewModel = viewModelNow(this@fragmentDelegate)
+            binder = injectNow()
         }
     }
 
@@ -88,13 +92,28 @@ class RestaurantListFragment : Fragment() {
     }
 
     private fun onStateUpdated(state: State) {
-        when (state) {
-            State.Initial -> Unit
-            is State.Loading -> bindViewForLoading(state.isRetryOrInitial)
-            is State.Content -> bindViewForContent(state.list)
-            State.NetworkError -> bindViewForNetworkError()
-            State.GeneralError -> bindViewForGeneralError()
-        }
+        binder(
+                views = RestaurantListViewStateBinder.Views(
+                        progressBar = progress,
+                        errorImageView = errorImageView,
+                        errorLayout = errorLayout,
+                        errorMessageView = errorMessageView,
+                        retryButton = retryButton,
+                        swipeRefreshLayout = restaurantListSwipeRefresh,
+                        restaurantList = restaurantList,
+                        restaurantListAdapter = adapter
+                ),
+                state = state,
+                params = RestaurantListViewStateBinder.Params(
+                        networkErrorResourceId = R.drawable.ic_network_error_48dp,
+                        networkErrorMessage = getString(R.string.networkerror_message),
+                        generalErrorResourceId = R.drawable.ic_general_error_48dp,
+                        generalErrorMessage = getString(R.string.generalerror_message),
+                        retryButtonClickListener = View.OnClickListener {
+                            viewModel.load(false)
+                        }
+                )
+        )
     }
 
     private fun onEvent(event: Event) {
@@ -104,64 +123,6 @@ class RestaurantListFragment : Fragment() {
         }
     }
 
-    private fun bindViewForLoading(isInitialOrRetry: Boolean) {
-        if (isInitialOrRetry) {
-            // Plays progress animation
-            progress.visibility = View.VISIBLE
-
-            // Makes restaurant list and swiperfresh stuff invisible
-            restaurantListSwipeRefresh.visibility = View.GONE
-        } else {
-            // Just disable interaction with restaurant list
-            restaurantList.isEnabled = false
-        }
-
-        errorLayout.visibility = View.GONE
-        retryButton.setOnClickListener(null)
-    }
-
-    private fun bindViewForContent(items: List<RestaurantItem>) {
-        // Hides progress animation
-        progress.visibility = View.GONE
-
-        // Hides error views
-        errorLayout.visibility = View.GONE
-        retryButton.setOnClickListener(null)
-
-        // Makes restaurant list visible and stops swipe refresh animation
-        restaurantListSwipeRefresh.visibility = View.VISIBLE
-        restaurantListSwipeRefresh.isRefreshing = false
-        restaurantList.isEnabled = true
-        adapter.submitList(items)
-    }
-
-    private fun bindViewForNetworkError() {
-        // Sets up error view
-        progress.visibility = View.GONE
-
-        errorLayout.visibility = View.VISIBLE
-        errorImageView.setImageResource(R.drawable.ic_network_error_48dp)
-        errorMessageView.text = getString(R.string.networkerror_message)
-        retryButton.setOnClickListener { viewModel.load() }
-
-        restaurantListSwipeRefresh.visibility = View.GONE
-        restaurantListSwipeRefresh.isRefreshing = false
-        adapter.submitList(emptyList())
-    }
-
-    private fun bindViewForGeneralError() {
-        // Sets up error view
-        progress.visibility = View.GONE
-
-        errorLayout.visibility = View.VISIBLE
-        errorImageView.setImageResource(R.drawable.ic_general_error_48dp)
-        errorMessageView.text = getString(R.string.generalerror_message)
-        retryButton.setOnClickListener { viewModel.load() }
-
-        restaurantListSwipeRefresh.visibility = View.GONE
-        restaurantListSwipeRefresh.isRefreshing = false
-        adapter.submitList(emptyList())
-    }
 
     private fun handleLookedUpEvent(index: Int, item: RestaurantItem) {
         onRestaurantItemClick(item)
