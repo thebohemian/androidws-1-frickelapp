@@ -9,6 +9,10 @@ import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import de.tarent.androidws.clean.core.extension.toOnClickListener
+import de.tarent.androidws.clean.core.viewmodel.Action
+import de.tarent.androidws.clean.feature.restaurant.view.OnRestaurantClickListener
 import de.tarent.androidws.clean.feature.restaurant.view.RestaurantListAdapter
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.State
 
@@ -22,15 +26,38 @@ internal class RestaurantListViewStateBinder {
             val retryButton: Button,
             val swipeRefreshLayout: SwipeRefreshLayout,
             val restaurantList: RecyclerView,
-            val restaurantListAdapter: RestaurantListAdapter)
+            val restaurantListAdapter: RestaurantListAdapter,
+            val fab: FloatingActionButton)
 
     data class Params(
             @DrawableRes val networkErrorResourceId: Int,
             val networkErrorMessage: String,
             @DrawableRes val generalErrorResourceId: Int,
             val generalErrorMessage: String,
-            val retryButtonClickListener: View.OnClickListener
+            val retryButtonAction: Action
     )
+
+    data class InitialParams(
+            val onRestaurantClickListener: OnRestaurantClickListener,
+            val onRestaurantCheckClickListener: OnRestaurantClickListener,
+            val onRefreshAction: Action,
+            val onGoToFinderAction: Action
+    )
+
+    operator fun invoke(views: Views, initialParams: InitialParams) {
+        with(views) {
+            restaurantList.adapter = restaurantListAdapter
+
+            with(restaurantListAdapter) {
+                onRestaurantClickListener = initialParams.onRestaurantClickListener
+                onRestaurantCheckClickListener = initialParams.onRestaurantCheckClickListener
+            }
+
+            swipeRefreshLayout.setOnRefreshListener(initialParams.onRefreshAction)
+
+            fab.setOnClickListener(initialParams.onGoToFinderAction.toOnClickListener())
+        }
+    }
 
     operator fun invoke(views: Views, state: State, params: Params) {
         when (state) {
@@ -87,7 +114,7 @@ internal class RestaurantListViewStateBinder {
             errorLayout.visibility = View.VISIBLE
             errorImageView.setImageResource(params.networkErrorResourceId)
             errorMessageView.text = params.networkErrorMessage
-            retryButton.setOnClickListener(params.retryButtonClickListener)
+            retryButton.setOnClickListener(params.retryButtonAction.toOnClickListener())
 
             swipeRefreshLayout.visibility = View.GONE
             swipeRefreshLayout.isRefreshing = false
@@ -104,7 +131,7 @@ internal class RestaurantListViewStateBinder {
             errorLayout.visibility = View.VISIBLE
             errorImageView.setImageResource(params.generalErrorResourceId)
             errorMessageView.text = params.generalErrorMessage
-            retryButton.setOnClickListener(params.retryButtonClickListener)
+            retryButton.setOnClickListener(params.retryButtonAction.toOnClickListener())
 
             swipeRefreshLayout.visibility = View.GONE
             swipeRefreshLayout.isRefreshing = false

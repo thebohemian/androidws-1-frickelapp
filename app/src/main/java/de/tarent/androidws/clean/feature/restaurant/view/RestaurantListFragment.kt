@@ -48,28 +48,32 @@ class RestaurantListFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.component_fragment_restaurantlist, container, false)
 
+    private fun views() = RestaurantListViewStateBinder.Views(
+            progressBar = progress,
+            errorImageView = errorImageView,
+            errorLayout = errorLayout,
+            errorMessageView = errorMessageView,
+            retryButton = retryButton,
+            swipeRefreshLayout = restaurantListSwipeRefresh,
+            restaurantList = restaurantList,
+            restaurantListAdapter = adapter,
+            fab = fab
+    )
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         fragmentDelegate.onActivityCreated(savedInstanceState)
 
-        restaurantList.adapter = adapter
-
-        // Wires a listener to the adapter which tells when a click
-        // on a restaurant item happened.
-        // For the moment shows a toast, might open a detail view later
-        adapter.onRestaurantClickListener = ::onRestaurantItemClick
-        adapter.onRestaurantCheckClickListener = ::onRestaurantItemCheckClick
-
-        // Handler for when "swipe refresh" gesture was done.
-        restaurantListSwipeRefresh.setOnRefreshListener {
-            viewModel.load(true)
-        }
-
-        // Handler for floating action button
-        fab.setOnClickListener {
-            findNavController().navigate(R.id.action_restaurantListFragment_to_finderFragment)
-        }
+        binder(
+                views = views(),
+                initialParams = RestaurantListViewStateBinder.InitialParams(
+                        onRestaurantClickListener = ::onRestaurantItemClick,
+                        onRestaurantCheckClickListener = ::onRestaurantItemCheckClick,
+                        onRefreshAction = ::onSwipeRefresh,
+                        onGoToFinderAction = ::onGoToFinderClick
+                )
+        )
 
         viewLifecycleOwner.apply {
             // Makes handleDataAvailable being called whenever new values
@@ -93,25 +97,14 @@ class RestaurantListFragment : Fragment() {
 
     private fun onStateUpdated(state: State) {
         binder(
-                views = RestaurantListViewStateBinder.Views(
-                        progressBar = progress,
-                        errorImageView = errorImageView,
-                        errorLayout = errorLayout,
-                        errorMessageView = errorMessageView,
-                        retryButton = retryButton,
-                        swipeRefreshLayout = restaurantListSwipeRefresh,
-                        restaurantList = restaurantList,
-                        restaurantListAdapter = adapter
-                ),
+                views = views(),
                 state = state,
                 params = RestaurantListViewStateBinder.Params(
                         networkErrorResourceId = R.drawable.ic_network_error_48dp,
                         networkErrorMessage = getString(R.string.networkerror_message),
                         generalErrorResourceId = R.drawable.ic_general_error_48dp,
                         generalErrorMessage = getString(R.string.generalerror_message),
-                        retryButtonClickListener = View.OnClickListener {
-                            viewModel.load(false)
-                        }
+                        retryButtonAction = ::onRetryClick
                 )
         )
     }
@@ -123,9 +116,25 @@ class RestaurantListFragment : Fragment() {
         }
     }
 
+    private fun handleLookUpFailedEvent(name: String) {
+        Snackbar.make(rootLayout, getString(R.string.restaurant_not_found, name), Snackbar.LENGTH_SHORT)
+                .show()
+    }
 
     private fun handleLookedUpEvent(index: Int, item: RestaurantItem) {
         onRestaurantItemClick(item)
+    }
+
+    private fun onRetryClick() {
+        viewModel.load()
+    }
+
+    private fun onGoToFinderClick() {
+        findNavController().navigate(R.id.action_restaurantListFragment_to_finderFragment)
+    }
+
+    private fun onSwipeRefresh() {
+        viewModel.load(true)
     }
 
     private fun onRestaurantItemClick(item: RestaurantItem) {
@@ -138,11 +147,6 @@ class RestaurantListFragment : Fragment() {
         context?.let { nonNullContext ->
             viewModel.toggleChecked(item)
         }
-    }
-
-    private fun handleLookUpFailedEvent(name: String) {
-        Snackbar.make(rootLayout, getString(R.string.restaurant_not_found, name), Snackbar.LENGTH_SHORT)
-                .show()
     }
 
     companion object {
