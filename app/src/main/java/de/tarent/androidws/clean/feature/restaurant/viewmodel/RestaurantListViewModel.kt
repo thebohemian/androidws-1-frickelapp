@@ -35,16 +35,18 @@ internal class RestaurantListViewModelImpl(
         private val getRestaurantUseCase: GetRestaurantUseCase
 ) : RestaurantListViewModel() {
 
-    private val mutableState = MutableLiveData<State>()
+    private val mutableState = MutableLiveData<State>(State.Initial)
 
     override val state = mutableState
 
     override fun load(useForce: Boolean) {
-        when (state.value) {
-            is State.Loading -> Unit
-            is State.Content -> if (useForce) doLoad(false)
-            else -> doLoad(true) // Initial, Error
-        }
+        /* TODO:
+         * inspect current state
+         * initial -> start loading
+         * loading -> what should we do when there is a load in progress already?
+         * content -> only load if forced, otherwise just stay
+         * error -> start loading
+         */
     }
 
     private fun doLoad(isRetryOrInitial: Boolean) {
@@ -59,8 +61,7 @@ internal class RestaurantListViewModelImpl(
     }
 
     private fun onData(list: List<Restaurant>) {
-        mutableState.value = State.Content(
-                list = list)
+        // TODO: Set the content state
     }
 
     private fun onFail(cause: RepositoryException) {
