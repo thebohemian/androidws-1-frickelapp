@@ -15,10 +15,10 @@ val RestaurantRepositoryModule = Module {
 
     factory<RestaurantRepository> { RestaurantRepositoryImpl(get()) }
 
-    factory<RestaurantsRemote> {
+    factory {
         RestaurantsRemote.create(get(), get(Names.BASE_URL))
     }
 
-    factory<String>(Names.BASE_URL) { get<Resources>().getString(R.string.service_url) }
+    factory(Names.BASE_URL) { get<Resources>().getString(R.string.service_url) }
 
 }

@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
+import androidx.camera.camera2.Camera2Config
 import androidx.camera.core.CameraX
 import androidx.camera.core.Preview
 import androidx.camera.core.PreviewConfig
