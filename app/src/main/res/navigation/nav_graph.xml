@@ -7,11 +7,8 @@
     <fragment
         android:id="@+id/restaurantListFragment"
         android:name="de.tarent.androidws.clean.feature.restaurant.view.RestaurantListFragment"
-        android:label="RestaurantListFragment">
-        <action
-            android:id="@+id/action_restaurantListFragment_to_finderFragment"
-            app:destination="@id/finderFragment" />
-    </fragment>
+        android:label="RestaurantListFragment" />
+
     <action
         android:id="@+id/action_global_restaurantListFragment"
         app:destination="@id/restaurantListFragment">
@@ -19,8 +16,5 @@
             android:name="lookupRestaurantName"
             android:defaultValue="null" />
     </action>
-    <fragment
-        android:id="@+id/finderFragment"
-        android:name="de.tarent.androidws.clean.feature.qrscanner.view.FinderFragment"
-        android:label="FinderFragment"/>
+
 </navigation>

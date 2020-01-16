@@ -12,8 +12,10 @@ import de.tarent.androidws.clean.feature.restaurant.usecase.GetRestaurantUseCase
 import de.tarent.androidws.clean.repository.common.RepositoryException
 import de.tarent.androidws.clean.repository.common.extension.onFail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import java.util.*
 
 internal abstract class RestaurantListViewModel : ViewModel() {
@@ -48,9 +50,9 @@ internal class RestaurantListViewModelImpl(
         private val restaurantItemMapper: RestaurantItemMapper
 ) : RestaurantListViewModel() {
 
-    private val mutableState = MutableLiveData<State>(State.Initial)
+    private val mutableState = MutableLiveData<State>().apply { setValue(State.Initial) }
 
-    private val mutableEvent = MutableLiveData(EventHolder<Event>(Event.None))
+    private val mutableEvent = MutableLiveData<EventHolder<Event>>().apply { setValue(EventHolder<Event>(Event.None)) }
 
     override val state = mutableState
 

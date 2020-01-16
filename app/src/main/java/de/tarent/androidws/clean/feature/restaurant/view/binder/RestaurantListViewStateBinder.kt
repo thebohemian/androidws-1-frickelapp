@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import de.tarent.androidws.clean.core.extension.toOnClickListener
 import de.tarent.androidws.clean.core.viewmodel.Action
 import de.tarent.androidws.clean.feature.restaurant.view.OnRestaurantClickListener
@@ -26,8 +25,7 @@ internal class RestaurantListViewStateBinder {
             val retryButton: Button,
             val swipeRefreshLayout: SwipeRefreshLayout,
             val restaurantList: RecyclerView,
-            val restaurantListAdapter: RestaurantListAdapter,
-            val fab: FloatingActionButton)
+            val restaurantListAdapter: RestaurantListAdapter)
 
     data class Params(
             @DrawableRes val networkErrorResourceId: Int,
@@ -40,8 +38,7 @@ internal class RestaurantListViewStateBinder {
     data class InitialParams(
             val onRestaurantClickListener: OnRestaurantClickListener,
             val onRestaurantCheckClickListener: OnRestaurantClickListener,
-            val onRefreshAction: Action,
-            val onGoToFinderAction: Action
+            val onRefreshAction: Action
     )
 
     operator fun invoke(views: Views, initialParams: InitialParams) {
@@ -54,8 +51,6 @@ internal class RestaurantListViewStateBinder {
             }
 
             swipeRefreshLayout.setOnRefreshListener(initialParams.onRefreshAction)
-
-            fab.setOnClickListener(initialParams.onGoToFinderAction.toOnClickListener())
         }
     }
 

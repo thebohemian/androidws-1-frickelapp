@@ -1,7 +1,6 @@
 package de.tarent.androidws.clean.feature.restaurant.injection
 
 import de.tarent.androidws.clean.core.concurrency.injection.IO_DISPATCHER
-import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.restaurant.mapper.RestaurantItemMapper
 import de.tarent.androidws.clean.feature.restaurant.usecase.GetRestaurantUseCase
 import de.tarent.androidws.clean.feature.restaurant.view.binder.RestaurantListViewStateBinder
@@ -14,13 +13,11 @@ import org.rewedigital.katana.dsl.get
 
 val RestaurantModule = Module {
 
-    factory<RestaurantItemMapper> { RestaurantItemMapper() }
+    factory { RestaurantItemMapper() }
 
-    factory<GetRestaurantUseCase> { GetRestaurantUseCase(get(IO_DISPATCHER), get()) }
+    factory { GetRestaurantUseCase(get(IO_DISPATCHER), get()) }
 
-    factory<RestaurantListViewStateBinder> { RestaurantListViewStateBinder() }
-
-    viewModel<FinderSharedViewModel> { FinderSharedViewModel() }
+    factory { RestaurantListViewStateBinder() }
 
     viewModel<RestaurantListViewModel> { RestaurantListViewModelImpl(get(), get()) }
 

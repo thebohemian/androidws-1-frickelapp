@@ -12,7 +12,6 @@ import com.google.android.material.snackbar.Snackbar
 import de.tarent.androidws.clean.R
 import de.tarent.androidws.clean.core.extension.observe
 import de.tarent.androidws.clean.core.extension.observeEvent
-import de.tarent.androidws.clean.feature.qrscanner.viewmodel.FinderSharedViewModel
 import de.tarent.androidws.clean.feature.restaurant.injection.RestaurantModule
 import de.tarent.androidws.clean.feature.restaurant.model.RestaurantItem
 import de.tarent.androidws.clean.feature.restaurant.view.binder.RestaurantListViewStateBinder
@@ -29,15 +28,12 @@ import org.rewedigital.katana.androidx.viewmodel.viewModelNow
 
 class RestaurantListFragment : Fragment() {
 
-    private lateinit var finderSharedViewModel: FinderSharedViewModel
-
     private lateinit var viewModel: RestaurantListViewModel
 
     private lateinit var binder: RestaurantListViewStateBinder
 
     private val fragmentDelegate: KatanaFragmentDelegate<RestaurantListFragment> = fragmentDelegate { activity, _ ->
         with((activity as KatanaTrait).component + listOf(RestaurantModule, RestaurantRepositoryModule)) {
-            finderSharedViewModel = activityViewModelNow(this@fragmentDelegate)
             viewModel = viewModelNow(this@fragmentDelegate)
             binder = injectNow()
         }
@@ -56,8 +52,7 @@ class RestaurantListFragment : Fragment() {
             retryButton = retryButton,
             swipeRefreshLayout = restaurantListSwipeRefresh,
             restaurantList = restaurantList,
-            restaurantListAdapter = adapter,
-            fab = fab
+            restaurantListAdapter = adapter
     )
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -70,8 +65,7 @@ class RestaurantListFragment : Fragment() {
                 initialParams = RestaurantListViewStateBinder.InitialParams(
                         onRestaurantClickListener = ::onRestaurantItemClick,
                         onRestaurantCheckClickListener = ::onRestaurantItemCheckClick,
-                        onRefreshAction = ::onSwipeRefresh,
-                        onGoToFinderAction = ::onGoToFinderClick
+                        onRefreshAction = ::onSwipeRefresh
                 )
         )
 
@@ -81,8 +75,6 @@ class RestaurantListFragment : Fragment() {
             // By definition runs on the UI-thread
             observe(viewModel.state, ::onStateUpdated)
             observeEvent(viewModel.event, ::onEvent)
-
-            observeEvent(finderSharedViewModel.nameEvent, ::onNameEvent)
         }
 
         // Final step:
@@ -127,10 +119,6 @@ class RestaurantListFragment : Fragment() {
 
     private fun onRetryClick() {
         viewModel.load()
-    }
-
-    private fun onGoToFinderClick() {
-        findNavController().navigate(R.id.action_restaurantListFragment_to_finderFragment)
     }
 
     private fun onSwipeRefresh() {
