@@ -13,6 +13,6 @@ val CoreModule = Module {
 
     singleton<CoroutineContext>(IO_DISPATCHER) { Concurrency.ioDispatcher() }
 
-    singleton<CoroutineContext>(IO_CONTEXT) { Concurrency.ioContext() }
+    singleton(IO_CONTEXT) { Concurrency.ioContext() }
 
 }

@@ -19,6 +19,6 @@ val RestaurantModule = Module {
 
     factory { RestaurantListViewStateBinder() }
 
-    viewModel<RestaurantListViewModel> { RestaurantListViewModelImpl(get(), get()) }
+    viewModel<RestaurantListViewModel> { throw UnsupportedOperationException("Implement me!") /* TODO: Create instance here */ }
 
 }

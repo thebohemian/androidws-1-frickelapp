@@ -36,8 +36,8 @@ internal class RestaurantListViewStateBinder {
     )
 
     data class InitialParams(
-            val onRestaurantClickListener: OnRestaurantClickListener,
-            val onRestaurantCheckClickListener: OnRestaurantClickListener,
+            val onRestaurantClickAction: OnRestaurantClickListener,
+            val onRestaurantCheckClickAction: OnRestaurantClickListener,
             val onRefreshAction: Action
     )
 
@@ -46,8 +46,8 @@ internal class RestaurantListViewStateBinder {
             restaurantList.adapter = restaurantListAdapter
 
             with(restaurantListAdapter) {
-                onRestaurantClickListener = initialParams.onRestaurantClickListener
-                onRestaurantCheckClickListener = initialParams.onRestaurantCheckClickListener
+                onRestaurantClickListener = initialParams.onRestaurantClickAction
+                onRestaurantCheckClickListener = initialParams.onRestaurantCheckClickAction
             }
 
             swipeRefreshLayout.setOnRefreshListener(initialParams.onRefreshAction)

@@ -5,25 +5,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
 import de.tarent.androidws.clean.R
 import de.tarent.androidws.clean.core.extension.observe
-import de.tarent.androidws.clean.core.extension.observeEvent
 import de.tarent.androidws.clean.feature.restaurant.injection.RestaurantModule
 import de.tarent.androidws.clean.feature.restaurant.model.RestaurantItem
 import de.tarent.androidws.clean.feature.restaurant.view.binder.RestaurantListViewStateBinder
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel
-import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.Event
 import de.tarent.androidws.clean.feature.restaurant.viewmodel.RestaurantListViewModel.State
 import de.tarent.androidws.clean.repository.restaurant.injection.RestaurantRepositoryModule
 import kotlinx.android.synthetic.main.component_fragment_restaurantlist.*
 import org.rewedigital.katana.KatanaTrait
 import org.rewedigital.katana.android.fragment.KatanaFragmentDelegate
 import org.rewedigital.katana.android.fragment.fragmentDelegate
-import org.rewedigital.katana.androidx.viewmodel.activityViewModelNow
 import org.rewedigital.katana.androidx.viewmodel.viewModelNow
 
 class RestaurantListFragment : Fragment() {
@@ -63,28 +57,22 @@ class RestaurantListFragment : Fragment() {
         binder(
                 views = views(),
                 initialParams = RestaurantListViewStateBinder.InitialParams(
-                        onRestaurantClickListener = ::onRestaurantItemClick,
-                        onRestaurantCheckClickListener = ::onRestaurantItemCheckClick,
+                        onRestaurantClickAction = ::onRestaurantItemClick,
+                        onRestaurantCheckClickAction = ::onRestaurantItemCheckClick,
                         onRefreshAction = ::onSwipeRefresh
                 )
         )
 
         viewLifecycleOwner.apply {
-            // Makes handleDataAvailable being called whenever new values
-            // are written into restaurantLiveData.
-            // By definition runs on the UI-thread
             observe(viewModel.state, ::onStateUpdated)
-            observeEvent(viewModel.event, ::onEvent)
         }
 
-        // Final step:
         // Automatic data load upon opening of the view.
         viewModel.load()
     }
 
     private fun onNameEvent(name: String) {
         Log.d(TAG, "name event: ${name}")
-        viewModel.tryLookup(name)
     }
 
     private fun onStateUpdated(state: State) {
@@ -101,22 +89,6 @@ class RestaurantListFragment : Fragment() {
         )
     }
 
-    private fun onEvent(event: Event) {
-        when (event) {
-            is Event.LookedUp -> handleLookedUpEvent(event.index, event.item)
-            is Event.LookUpFailed -> handleLookUpFailedEvent(event.name)
-        }
-    }
-
-    private fun handleLookUpFailedEvent(name: String) {
-        Snackbar.make(rootLayout, getString(R.string.restaurant_not_found, name), Snackbar.LENGTH_SHORT)
-                .show()
-    }
-
-    private fun handleLookedUpEvent(index: Int, item: RestaurantItem) {
-        onRestaurantItemClick(item)
-    }
-
     private fun onRetryClick() {
         viewModel.load()
     }
@@ -126,15 +98,11 @@ class RestaurantListFragment : Fragment() {
     }
 
     private fun onRestaurantItemClick(item: RestaurantItem) {
-        context?.let { nonNullContext ->
-            Toast.makeText(nonNullContext, "Clicked: ${item.restaurant.name}", Toast.LENGTH_SHORT).show()
-        }
+        // Can be used if needed
     }
 
     private fun onRestaurantItemCheckClick(item: RestaurantItem) {
-        context?.let { nonNullContext ->
-            viewModel.toggleChecked(item)
-        }
+        // Can be used if needed
     }
 
     companion object {

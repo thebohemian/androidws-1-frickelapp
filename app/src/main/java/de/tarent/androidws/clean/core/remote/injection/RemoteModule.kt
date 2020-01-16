@@ -25,7 +25,7 @@ private const val CACHE_SIZE_BYTES = 1024 * 1024 * 10L
 
 val RemoteModule = Module {
 
-    factory<Cache> { Cache(get<Context>(APPLICATION_CONTEXT).cacheDir, CACHE_SIZE_BYTES) }
+    factory { Cache(get<Context>(APPLICATION_CONTEXT).cacheDir, CACHE_SIZE_BYTES) }
 
     factory<HttpLoggingInterceptor.Logger> {
         object : HttpLoggingInterceptor.Logger {
@@ -35,9 +35,9 @@ val RemoteModule = Module {
         }
     }
 
-    singleton<HttpLoggingInterceptor> { HttpLoggingInterceptor(get()).apply { level = HttpLoggingInterceptor.Level.BODY } }
+    singleton { HttpLoggingInterceptor(get()).apply { level = HttpLoggingInterceptor.Level.BODY } }
 
-    singleton<OkHttpClient> {
+    singleton {
         OkHttpClient.Builder()
                 .apply {
                     connectTimeout(CONNECT_TIME_OUT, TimeUnit.SECONDS)
@@ -66,5 +66,5 @@ val RemoteModule = Module {
                 .addConverterFactory(get<MoshiConverterFactory>())
     }
 
-    singleton<ServiceCreator> { ServiceCreator(get()) }
+    singleton { ServiceCreator(get()) }
 }
