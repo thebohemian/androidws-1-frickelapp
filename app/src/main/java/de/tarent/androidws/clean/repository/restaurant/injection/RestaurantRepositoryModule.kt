@@ -8,12 +8,13 @@ import de.tarent.androidws.clean.repository.restaurant.repository.RestaurantRepo
 import org.rewedigital.katana.Module
 import org.rewedigital.katana.dsl.factory
 import org.rewedigital.katana.dsl.get
+import java.lang.UnsupportedOperationException
 
 private enum class Names { BASE_URL }
 
 val RestaurantRepositoryModule = Module {
 
-    factory<RestaurantRepository> { RestaurantRepositoryImpl(get()) }
+    factory<RestaurantRepository> { throw UnsupportedOperationException() /* TODO: Create instance */ }
 
     factory {
         RestaurantsRemote.create(get(), get(Names.BASE_URL))

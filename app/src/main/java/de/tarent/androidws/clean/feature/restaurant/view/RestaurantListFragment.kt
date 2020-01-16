@@ -90,11 +90,11 @@ class RestaurantListFragment : Fragment() {
     }
 
     private fun onRetryClick() {
-        viewModel.load()
+        // Can be used if needed
     }
 
     private fun onSwipeRefresh() {
-        viewModel.load(true)
+        // Can be used if needed
     }
 
     private fun onRestaurantItemClick(item: RestaurantItem) {
