@@ -16,7 +16,7 @@ class RestaurantApp : Application() {
         Katana.environmentContext = AndroidEnvironmentContext()
 
         component = Component(
-                modules = listOf(ApplicationModule(this), CoreModule, RemoteModule)
+                modules = listOf(ApplicationModule(this), /* other modules */)
         )
     }
 
